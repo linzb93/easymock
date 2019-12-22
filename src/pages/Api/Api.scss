@@ -1,0 +1,22 @@
+.code-con {
+  padding-left: 320px;
+  height: 100%;
+  position: relative;
+}
+.left-config {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  height: 100%;
+  width: 320px;
+  background: #f5f5f5;
+}
+.config-form-wrapper {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  left: 10px;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}

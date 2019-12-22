@@ -1,8 +1,11 @@
 const express = require('express');
-const mainRouter = require('./router');
+const {mainRouter, mockRouter} = require('./router');
 const detectPort = require('detect-port');
-const app = express();
+const bodyParser = require('body-parser');
+const hook = require('./hook');
+require('./uncaughtError');
 
+const app = express();
 
 app.all('*', function (_, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -11,13 +14,16 @@ app.all('*', function (_, res, next) {
   res.header('Content-Type', 'application/json;charset=utf-8');
   next();
 });
-
+app.use('/', express.static('build'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static('./public'));
-app.use('/', mainRouter);
 
+app.use('/api', mainRouter);
+app.use('/', mockRouter);
+hook(app);
 (async () => {
-  const port = await detectPort(3000);
-  app.listen(port);
+  const port = await detectPort(4000);
+  app.listen(port, () => {
+    console.log(`listen on ${port}`)
+  });
 })();
