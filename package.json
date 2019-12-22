@@ -24,8 +24,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start:server": "react-scripts build && nodemon app",
-    "build": "react-scripts build",
-    "prod": "node app"
+    "prod": "react-scripts build && node app"
   },
   "browserslist": {
     "production": [
