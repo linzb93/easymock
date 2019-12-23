@@ -19,7 +19,7 @@ router.post('/api/delete', controller.api.delete);
 router.get('/api/detail', controller.api.detail);
 // router.post('/api/clone', controller.api.clone);
 // router.post('/api/upload', controller.api.upload);
-// router.get('/api/download', controller.api.download);
+router.get('/api/download', controller.api.download);
 
 // other
 // router.post('/open_vscode', controller.other.open_vscode);

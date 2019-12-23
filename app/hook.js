@@ -8,4 +8,10 @@ module.exports = app => {
       fs.mkdir(resolve('./run'))
     }
   });
+  fs.access(resolve('./.temp'), fs.constants.F_OK)
+  .catch(e => {
+    if (e.code === 'ENOENT') {
+      fs.mkdir(resolve('./.temp'))
+    }
+  });
 }

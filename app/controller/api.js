@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const uuid = require('uuid/v4');
 const Mock = require('mockjs');
 const {remove} = require('lodash');
+const archiver = require('archiver');
 const {formatRes, resolve, jsonFormat} = require('../util');
 
 exports.page = (req, res) => {
@@ -154,4 +155,25 @@ exports.delete = (req, res) => {
       message: '删除成功'
     });
   })
+}
+exports.download = (req, res) => {
+  const {project_id} = req.query;
+  fs.readFile(resolve(`./run/${project_id}/meta.json`))
+  .then(str => {
+    const data = JSON.parse(str);
+    const {title: fileName} = data;
+    let output = fs.createWriteStream(resolve(`./.temp/${fileName}.zip`));
+    let archive = archiver('zip', {
+      zlib: {level: 9}
+    });
+    output.on('close', () => {
+      res.download(resolve(`./.temp/${fileName}.zip`));
+    });
+    archive.on('error', err => {
+      throw err;
+    });
+    archive.pipe(output);
+    archive.directory(`/run/${project_id}/`);
+    archive.finalize();
+  });
 }

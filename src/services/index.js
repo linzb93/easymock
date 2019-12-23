@@ -59,3 +59,6 @@ export function deleteApi(params) {
     ...params
   });
 }
+export function exportApi(params) {
+  return service.get(`/api/download?${stringify(params)}`);
+}

@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {Table, Button, message} from 'antd';
 import Preview from './Preview';
-import {getProjectDetail, getApiPage, deleteApi} from '../../services';
+import {getProjectDetail, getApiPage, deleteApi,exportApi} from '../../services';
 
 export default class List extends PureComponent {
   state = {
@@ -87,6 +87,15 @@ export default class List extends PureComponent {
       fetch_type: type
     })
   }
+  export = () => {
+    const {project_id} = this.state;
+    exportApi({
+      project_id
+    })
+    .then(() => {
+      message.success('下载成功');
+    })
+  }
   render() {
     const {
       data,
@@ -101,6 +110,7 @@ export default class List extends PureComponent {
         <div className="table-filter">
           <p>接口前缀：/mock/{prefix}</p>
           <Button type="primary" onClick={this.add}>添加接口</Button>
+          <Button type="primary" onClick={this.export}>导出接口</Button>
         </div>
         <Table
           dataSource={data}
