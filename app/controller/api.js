@@ -162,12 +162,13 @@ exports.download = (req, res) => {
   .then(str => {
     const data = JSON.parse(str);
     const {title: fileName} = data;
-    let output = fs.createWriteStream(resolve(`./.temp/${fileName}.zip`));
+    const uid = uuid();
+    let output = fs.createWriteStream(resolve(`./.temp/${uid}.zip`));
     let archive = archiver('zip', {
       zlib: {level: 9}
     });
     output.on('close', () => {
-      res.download(resolve(`./.temp/${fileName}.zip`));
+      res.download(resolve(`./.temp/${uid}.zip`));
     });
     archive.on('error', err => {
       throw err;

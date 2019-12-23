@@ -3,3 +3,4 @@ logs
 run
 build
 .temp
+.DS_Store

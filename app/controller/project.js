@@ -76,7 +76,7 @@ exports.detail = (req,res) => {
   fs.readFile(resolve(`./run/${project_id}/meta.json`))
   .then(str => {
     const data = JSON.parse(str);
-    const {title, desc, prefix} = data;
+    const {title, desc, prefix = ''} = data;
     formatRes(res, {
       data: {
         title,
