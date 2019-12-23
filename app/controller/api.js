@@ -91,10 +91,25 @@ exports.update = (req, res) => {
     match.type = type;
     match.title = title;
     fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
-    fs.writeFile(resolve(`./run/${project_id}${url}.json`), code);
-    formatRes(res, {
-      message: '修改成功'
-    });
+    fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
+    .then(() => {
+      formatRes(res, {
+        message: '修改成功'
+      });
+    })
+    .catch(() => {
+      const dir = url.split('/').slice(0, -1).join('/');
+      fs.mkdir(resolve(`./run/${project_id}/${dir}`), {recursive: true})
+      .then(() => {
+        return fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
+      })
+      .then(() => {
+        formatRes(res, {
+          message: '修改成功'
+        });
+      });
+    })
+    
   });
 }
 

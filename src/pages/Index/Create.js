@@ -32,13 +32,13 @@ class CreateModal extends PureComponent {
           ...values,
           project_id
         })
-        .then(res => {
+        .then(() => {
           message.success('修改成功');
           this.onCancel();
         })
       } else {
         createProject(values)
-        .then(res => {
+        .then(() => {
           message.success('添加成功');
           this.onCancel();
         })
@@ -75,6 +75,13 @@ class CreateModal extends PureComponent {
                 }
               ],
               initialValue: data.title || undefined
+            })(
+              <Input />
+            )}
+          </FormItem>
+          <FormItem label="前缀">
+            {getFieldDecorator('prefix', {
+              initialValue: data.prefix || undefined
             })(
               <Input />
             )}

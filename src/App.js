@@ -5,7 +5,7 @@ import {
   Route
 } from "react-router-dom";
 import routerConfig from './router';
-import './App.scss';
+import './App.css';
 
 export default function App() {
   return (

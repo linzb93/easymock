@@ -1,10 +1,11 @@
 import React, {PureComponent} from 'react';
 import {Table, Button, message} from 'antd';
 import Preview from './Preview';
-import {getApiPage, deleteApi} from '../../services';
+import {getProjectDetail, getApiPage, deleteApi} from '../../services';
 
 export default class List extends PureComponent {
   state = {
+    prefix: '',
     data: [],
     isShowPreviewModal: false,
     project_id: '',
@@ -26,18 +27,31 @@ export default class List extends PureComponent {
         <div className="table-opr-wrap">
           <Button type="primary" size="small" onClick={() => {this.edit(record.id)}}>编辑</Button>
           <Button type="primary" size="small" onClick={() => {this.preview(record.id, record.type)}}>预览</Button>
-          <Button type="primary" size="small" onClick={() => {this.copy(record.project_id)}}>复制</Button>
+          <Button type="primary" size="small" onClick={() => {this.copy(record.id)}}>复制</Button>
           <Button type="danger" size="small" onClick={() => {this.delete(record.id)}}>删除</Button>
         </div>
       )
     }
   ]
   componentDidMount() {
-    this.fetchList();
+    const {project_id} = this.props.match.params
+    getProjectDetail({
+      project_id
+    })
+    .then(res => {
+      const {prefix} = res.data;
+      this.setState({
+        project_id,
+        prefix: `${project_id}${prefix}`
+      }, () => {
+        this.fetchList();
+      })
+    });
   }
   fetchList = () => {
+    const {project_id} = this.state;
     getApiPage({
-      project_id: this.props.match.params.project_id
+      project_id
     })
     .then(res => {
       this.setState({
@@ -46,18 +60,17 @@ export default class List extends PureComponent {
     })
   }
   add = () => {
-    const {match, history} = this.props;
-    const {project_id} = match.params;
+    const {project_id} = this.state;
+    const {history} = this.props;
     history.push(`/project/${project_id}/create`);
   };
   edit = id => {
-    const {match, history} = this.props;
-    const {project_id} = match.params;
+    const {project_id} = this.state;
+    const {history} = this.props;
     history.push(`/project/${project_id}/update/${id}`);
   }
   delete = id => {
-    const {match} = this.props;
-    const {project_id} = match.params;
+    const {project_id} = this.state;
     deleteApi({
       project_id,
       api_id: id
@@ -75,12 +88,18 @@ export default class List extends PureComponent {
     })
   }
   render() {
-    const {data, isShowPreviewModal, api_id, fetch_type} = this.state;
-    const {match} = this.props;
-    const project_id = match.params.project_id;
+    const {
+      data,
+      isShowPreviewModal,
+      project_id,
+      api_id,
+      fetch_type,
+      prefix
+    } = this.state;
     return (
       <div className="wrapper">
         <div className="table-filter">
+          <p>接口前缀：/mock/{prefix}</p>
           <Button type="primary" onClick={this.add}>添加接口</Button>
         </div>
         <Table

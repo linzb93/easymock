@@ -4,7 +4,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-monokai";
 import {createApi, updateApi, getApiDetail} from '../../services';
-import './Api.scss';
+import './Api.css';
 
 const FormItem = Form.Item;
 const {Option} = Select;
@@ -103,7 +103,7 @@ class Editor extends PureComponent {
               </FormItem>
               <FormItem label="方式">
                 {getFieldDecorator('type', {
-                  initialValue: data.type
+                  initialValue: data.type || 'get'
                 })(
                   <Select placeholder="请选择请求方式">
                     {typeList.map(item => (

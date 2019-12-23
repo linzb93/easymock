@@ -27,13 +27,14 @@ exports.list = (req, res) => {
 }
 
 exports.create = (req, res) => {
-  const {title, desc} = req.body;
+  const {title, desc, prefix = ''} = req.body;
   const uid = uuid();
   fs.mkdir(resolve(`./run/${uid}`))
   .then(() => {
     return fs.writeFile(resolve(`./run/${uid}/meta.json`), jsonFormat({
       title,
       desc,
+      prefix,
       items: []
     }))
   })
@@ -46,12 +47,13 @@ exports.create = (req, res) => {
 }
 
 exports.update = (req,res) => {
-  const {title, desc, project_id} = req.body;
+  const {title, desc, prefix = '', project_id} = req.body;
   fs.readFile(resolve(`./run/${project_id}/meta.json`))
   .then(str => {
     let data = JSON.parse(str);
     data.title = title;
     data.desc = desc;
+    data.prefix = prefix;
     fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data))
     .then(() => {
       formatRes(res, {
@@ -74,11 +76,12 @@ exports.detail = (req,res) => {
   fs.readFile(resolve(`./run/${project_id}/meta.json`))
   .then(str => {
     const data = JSON.parse(str);
-    const {title, desc} = data;
+    const {title, desc, prefix} = data;
     formatRes(res, {
       data: {
         title,
-        desc
+        desc,
+        prefix
       }
     });
   })
