@@ -1,7 +1,8 @@
 import axios from 'axios';
-import {stringify} from 'qs'
+import {stringify} from 'qs';
+const baseURL = 'http://localhost:4000/api';
 const service = axios.create({
-  baseURL: 'http://localhost:4000/api'
+  baseURL
 });
 
 service.interceptors.response.use(function (response) {
@@ -60,5 +61,5 @@ export function deleteApi(params) {
   });
 }
 export function exportApi(params) {
-  return service.get(`/api/download?${stringify(params)}`);
+  return `${baseURL}/api/download?${stringify(params)}`
 }

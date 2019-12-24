@@ -161,7 +161,7 @@ exports.download = (req, res) => {
   fs.readFile(resolve(`./run/${project_id}/meta.json`))
   .then(str => {
     const data = JSON.parse(str);
-    const {title: fileName} = data;
+    const  {title} = data;
     const uid = uuid();
     let output = fs.createWriteStream(resolve(`./.temp/${uid}.zip`));
     let archive = archiver('zip', {
@@ -169,12 +169,13 @@ exports.download = (req, res) => {
     });
     output.on('close', () => {
       res.download(resolve(`./.temp/${uid}.zip`));
+      // res.sendFile(`${process.cwd()}/run/${project_id}`);
     });
     archive.on('error', err => {
       throw err;
     });
     archive.pipe(output);
-    archive.directory(`/run/${project_id}/`);
+    archive.directory(`${process.cwd()}/run/${project_id}/`, `${project_id}`);
     archive.finalize();
   });
 }

@@ -89,12 +89,22 @@ export default class List extends PureComponent {
   }
   export = () => {
     const {project_id} = this.state;
-    exportApi({
+    const url = exportApi({
       project_id
-    })
-    .then(() => {
-      message.success('下载成功');
-    })
+    });
+    let ifr = document.getElementById('temp-download-iframe');
+    if (ifr) {
+      ifr.src = url;
+      // ifr.reload();
+    } else {
+      let iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.id = 'temp-download-iframe';
+      document.getElementsByTagName('head')[0].appendChild(iframe);
+    }
+    // .then(() => {
+    //   message.success('下载成功');
+    // })
   }
   render() {
     const {
