@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const mockRouter = express.Router();
+const multer = require('multer');
 const controller = require('./controller');
+
+const upload = multer();
 
 // project
 router.get('/project/list', controller.project.list);
@@ -18,7 +21,7 @@ router.post('/api/update', controller.api.update);
 router.post('/api/delete', controller.api.delete);
 router.get('/api/detail', controller.api.detail);
 // router.post('/api/clone', controller.api.clone);
-// router.post('/api/upload', controller.api.upload);
+router.post('/api/upload', upload.any(), controller.api.upload);
 router.get('/api/download', controller.api.download);
 
 // other

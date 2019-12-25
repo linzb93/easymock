@@ -3,7 +3,10 @@ const fs = require('fs-extra');
 const uuid = require('uuid/v4');
 const Mock = require('mockjs');
 const {remove} = require('lodash');
+const through = require('through2');
+const unzip = require('unzip');
 const archiver = require('archiver');
+
 const {formatRes, resolve, jsonFormat} = require('../util');
 
 exports.page = (req, res) => {
@@ -58,22 +61,22 @@ exports.create = (req, res) => {
     });
     data.items = items;
     fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
-    fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
+    return fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
+  })
+  .then(() => {
+    formatRes(res, {
+      message: '添加成功'
+    });
+  })
+  .catch(() => {
+    const dir = url.split('/').slice(0, -1).join('/');
+    fs.mkdir(resolve(`./run/${project_id}/${dir}`), {recursive: true})
+    .then(() => {
+      return fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
+    })
     .then(() => {
       formatRes(res, {
         message: '添加成功'
-      });
-    })
-    .catch(() => {
-      const dir = url.split('/').slice(0, -1).join('/');
-      fs.mkdir(resolve(`./run/${project_id}/${dir}`), {recursive: true})
-      .then(() => {
-        return fs.writeFile(resolve(`./run/${project_id}${url}.json`), code)
-      })
-      .then(() => {
-        formatRes(res, {
-          message: '添加成功'
-        });
       });
     });
   });
@@ -110,7 +113,6 @@ exports.update = (req, res) => {
         });
       });
     })
-    
   });
 }
 
@@ -169,7 +171,6 @@ exports.download = (req, res) => {
     });
     output.on('close', () => {
       res.download(resolve(`./.temp/${uid}.zip`));
-      // res.sendFile(`${process.cwd()}/run/${project_id}`);
     });
     archive.on('error', err => {
       throw err;
@@ -177,5 +178,20 @@ exports.download = (req, res) => {
     archive.pipe(output);
     archive.directory(`${process.cwd()}/run/${project_id}/`, `${project_id}`);
     archive.finalize();
+  });
+}
+exports.upload = (req, res) => {
+  const oriBuffer = req.files[0].buffer;
+  fs.createReadStream(oriBuffer)
+  .pipe(unzip.Parse())
+  .on('entry', entry => {
+    entry
+    .pipe(through(function(chunk, _, callback) {}))
+    .pipe()
+    .on('end', () => {
+      formatRes(res, {
+        data: ''
+      });
+    })
   });
 }
