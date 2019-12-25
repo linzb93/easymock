@@ -7,28 +7,28 @@ const controller = require('./controller');
 const upload = multer();
 
 // project
-router.get('/project/list', controller.project.list);
-router.post('/project/create', controller.project.create);
-router.post('/project/update', controller.project.update);
-router.get('/project/detail', controller.project.detail);
-router.post('/project/delete', controller.project.delete);
+router.get('/project/list', controller.project.list); // 获取项目列表
+router.post('/project/create', controller.project.create); // 创建项目
+router.post('/project/update', controller.project.update); // 更新项目
+router.get('/project/detail', controller.project.detail); // 获取项目详情
+router.post('/project/delete', controller.project.delete); // 删除项目
 
 // api
-router.get('/api/page', controller.api.page);
-router.all('/api/preview', controller.api.preview);
-router.post('/api/create', controller.api.create);
-router.post('/api/update', controller.api.update);
-router.post('/api/delete', controller.api.delete);
-router.get('/api/detail', controller.api.detail);
-// router.post('/api/clone', controller.api.clone);
-router.post('/api/upload', upload.any(), controller.api.upload);
-router.get('/api/download', controller.api.download);
+router.get('/api/page', controller.api.page); // 获取项目api分页
+router.all('/api/preview', controller.api.preview); // 预览项目api
+router.post('/api/create', controller.api.create); // 创建项目api
+router.post('/api/update', controller.api.update); // 更新项目api
+router.post('/api/delete', controller.api.delete); // 删除项目api
+router.get('/api/detail', controller.api.detail); // 获取项目api详情
+// router.post('/api/clone', controller.api.clone); // 复制项目api
+router.post('/api/upload', upload.any(), controller.api.upload); // 上传项目api压缩包
+router.get('/api/download', controller.api.download); // 下载项目api压缩包
 
 // other
 // router.post('/open_vscode', controller.other.open_vscode);
 
 // mock
-mockRouter.all('/mock/:project_id/*', controller.mock);
+mockRouter.all('/mock/:project_id/*', controller.mock); // mock接口
 
 exports.mainRouter = router;
 exports.mockRouter = mockRouter;

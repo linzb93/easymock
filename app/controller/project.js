@@ -1,106 +1,170 @@
 const fs = require('fs-extra');
 const ow = require('ow');
 const uuid = require('uuid/v4');
+const del = require('del');
 const {formatRes, resolve, jsonFormat} = require('../util');
 
-exports.list = (req, res) => {
-  fs.readdir(resolve('./run'))
-  .then(dirs => {
-    const pMap = dirs.map(dir => {
-      return fs.readFile(resolve(`./run/${dir}/meta.json`))
-      .then(str => {
-        const data = JSON.parse(str);
-        return Promise.resolve({
-          title: data.title,
-          project_id: dir
-        });
-      });
-    });
-    return Promise.all(pMap);
-  })
-  .then(list => {
+// 获取项目列表
+exports.list = async (_, res) => {
+  let dirs;
+  try {
+    dirs = await fs.readdir(resolve('./run'));
+  } catch(e) {
     formatRes(res, {
-      message: '发送成功',
-      data: list
-    })
-  })
-}
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  const pMap = dirs.map(async dir => {
+    let data;
+    try {
+      const str = await fs.readFile(resolve(`./run/${dir}/meta.json`));
+      data = JSON.parse(str);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return Promise.resolve({
+      title: data.title,
+      project_id: dir
+    });
+  });
+  let list;
+  try {
+    list = await Promise.all(pMap);
+  } catch(e) {
+    formatRes(res, {
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  formatRes(res, {
+    message: '发送成功',
+    data: list
+  });
+};
 
-exports.create = (req, res) => {
+// 创建项目
+exports.create = async (req, res) => {
   const {title, desc, prefix = ''} = req.body;
   const uid = uuid();
-  fs.mkdir(resolve(`./run/${uid}`))
-  .then(() => {
-    return fs.writeFile(resolve(`./run/${uid}/meta.json`), jsonFormat({
+  try {
+    await fs.mkdir(resolve(`./run/${uid}`));
+  } catch (e) {
+    formatRes(res, {
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  try {
+    await fs.writeFile(resolve(`./run/${uid}/meta.json`), jsonFormat({
       title,
       desc,
       prefix,
       items: []
     }))
-  })
-  .then(() => {
+  } catch(e) {
     formatRes(res, {
-      data: null,
-      message: '创建成功'
+      error: 'server',
+      message: e
     });
+    return;
+  }
+  formatRes(res, {
+    data: null,
+    message: '创建成功'
+  });
+};
+
+// 更新项目
+exports.update = async (req,res) => {
+  const {title, desc, prefix = '', project_id} = req.body;
+  let data;
+  try {
+    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    data = JSON.parse(str);
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      formatRes(res, {
+        error: 'client',
+        message: 'project不存在'
+      });
+    } else {
+      formatRes(res, {
+        error: 'server',
+        message: e
+      });
+    }
+    return;
+  }
+  data = {
+    ...data,
+    title,
+    desc,
+    prefix
+  }
+  try {
+    await fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
+  } catch (e) {
+    formatRes(res, {
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  formatRes(res, {
+    data: null,
+    message: '更新成功'
   });
 }
 
-exports.update = (req,res) => {
-  const {title, desc, prefix = '', project_id} = req.body;
-  fs.readFile(resolve(`./run/${project_id}/meta.json`))
-  .then(str => {
-    let data = JSON.parse(str);
-    data.title = title;
-    data.desc = desc;
-    data.prefix = prefix;
-    fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data))
-    .then(() => {
-      formatRes(res, {
-        data: null,
-        message: '更新成功'
-      });
-    })
-  })
-  .catch(e => {
-    if (e.code === 'ENOENT') {
-      formatRes(res, {
-        error: 'client',
-        message: 'project不存在'
-      });
-    }
-  })
-}
-exports.detail = (req,res) => {
+// 获取项目详情
+exports.detail = async (req,res) => {
   const {project_id} = req.query;
-  fs.readFile(resolve(`./run/${project_id}/meta.json`))
-  .then(str => {
-    const data = JSON.parse(str);
-    const {title, desc, prefix = ''} = data;
+  let data;
+  try {
+    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    data = JSON.parse(str);
+  } catch (e) {
     formatRes(res, {
-      data: {
-        title,
-        desc,
-        prefix
-      }
+      error: 'server',
+      message: e
     });
-  })
+    return;
+  }
+  const {title, desc, prefix = ''} = data;
+  formatRes(res, {
+    data: {
+      title,
+      desc,
+      prefix
+    }
+  });
 }
-exports.delete = (req,res) => {
+
+// 删除项目
+exports.delete = async (req,res) => {
   const {project_id} = req.body;
-  fs.rmdir(resolve(`./run/${project_id}`))
-  .then(() => {
-    formatRes(res, {
-      data: null,
-      message: '删除成功'
-    });
-  })
-  .catch(e => {
+  try {
+    await del(resolve(`./run/${project_id}`));
+  } catch(e) {
     if (e.code === 'ENOENT') {
       formatRes(res, {
         error: 'client',
         message: 'project不存在'
       });
+    } else {
+      formatRes(res, {
+        error: 'server',
+        message: e
+      });
     }
-  })
+    return;
+  }
+  formatRes(res, {
+    data: null,
+    message: '删除成功'
+  });
 }
