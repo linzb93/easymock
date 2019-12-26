@@ -1,7 +1,10 @@
 const fs = require('fs-extra');
-const ow = require('ow');
 const uuid = require('uuid/v4');
 const del = require('del');
+const stream = require('stream');
+const unzip = require('unzip');
+const path = require('path');
+const through = require('through2');
 const {formatRes, resolve, jsonFormat} = require('../util');
 
 // 获取项目列表
@@ -26,7 +29,8 @@ exports.list = async (_, res) => {
     }
     return Promise.resolve({
       title: data.title,
-      project_id: dir
+      project_id: dir,
+      count: data.items.length
     });
   });
   let list;
@@ -167,4 +171,21 @@ exports.delete = async (req,res) => {
     data: null,
     message: '删除成功'
   });
+}
+
+// 上传项目
+exports.upload = (req, res) => {
+  const oriBuffer = req.files[0].buffer;
+  const list = [];
+  const bufferStream = new stream.PassThrough();
+  bufferStream.end(oriBuffer);
+  const readStream = bufferStream.pipe(unzip.Parse());
+  readStream.on('entry', entry => {
+    list.push(entry.path)
+  });
+  readStream.on('close', () => {
+    formatRes(res, {
+      data: list
+    });
+  })
 }

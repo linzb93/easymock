@@ -1,23 +1,23 @@
 const fs = require('fs-extra');
 const {resolve} = require('./util');
 
-module.exports = app => {
-  fs.readdir(resolve('./run'), fs.constants.F_OK)
-  .catch(e => {
+module.exports = async app => {
+  await createDir(`./run/project`, true);
+  try {
+    await fs.readFile(resolve(`./run/data.json`));
+  } catch (e) {
+    await fs.writeFile(resolve('./run/data.json'), '');
+  }
+  await createDir(`./.temp`);
+  await createDir(`./logs`);
+}
+
+async function createDir(dirPath, isRecursive) {
+  try {
+    await fs.readdir(resolve(dirPath));
+  } catch (e) {
     if (e.code === 'ENOENT') {
-      fs.mkdir(resolve('./run'))
+      await fs.mkdir(resolve(dirPath), {recursive: isRecursive});
     }
-  });
-  fs.readdir(resolve('./.temp'), fs.constants.F_OK)
-  // .then(files => {
-  //   files.forEach(file => {
-  //     console.log(resolve(`./.temp/${file}`));
-  //     fs.unlink(resolve(`./.temp/${file}`));
-  //   });
-  // })
-  .catch(e => {
-    if (e.code === 'ENOENT') {
-      fs.mkdir(resolve('./.temp'))
-    }
-  });
+  }
 }

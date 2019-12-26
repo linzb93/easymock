@@ -12,7 +12,7 @@ router.post('/project/create', controller.project.create); // 创建项目
 router.post('/project/update', controller.project.update); // 更新项目
 router.get('/project/detail', controller.project.detail); // 获取项目详情
 router.post('/project/delete', controller.project.delete); // 删除项目
-
+router.post('/project/upload',upload.any(), controller.project.upload); // 上传项目
 // api
 router.get('/api/page', controller.api.page); // 获取项目api分页
 router.all('/api/preview', controller.api.preview); // 预览项目api
@@ -26,15 +26,9 @@ router.get('/api/download', controller.api.download); // 下载项目api压缩�
 
 // other
 // router.post('/open_vscode', controller.other.open_vscode);
-router.use((_, res) => {
-  res.status(404).send('404');
-});
 
 // mock
 mockRouter.all('/mock/:project_id/*', controller.mock); // mock接口
-mockRouter.use((_, res) => {
-  res.status(404).send('404');
-});
 
 exports.mainRouter = router;
 exports.mockRouter = mockRouter;

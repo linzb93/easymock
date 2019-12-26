@@ -1,5 +1,6 @@
 import React, {PureComponent} from 'react';
 import CreateModal from './Create';
+import ImportModal from './Import';
 import {Table, Button, message} from 'antd';
 import {Link} from 'react-router-dom';
 import {getProjectList, deleteProject} from '../../services';
@@ -8,6 +9,7 @@ export default class Index extends PureComponent {
   state = {
     data: [],
     isShowCreateModal: false,
+    isShowImportModal: false,
     project_id: ''
   }
   columns = [
@@ -47,9 +49,9 @@ export default class Index extends PureComponent {
       })
     })
   }
-  cancelModal = () => {
+  cancelModal = name => {
     this.setState({
-      isShowCreateModal: false
+      [name]: false
     });
     this.getProjectList();
   }
@@ -63,18 +65,23 @@ export default class Index extends PureComponent {
     deleteProject({
       project_id
     })
-    .then(res => {
+    .then(() => {
       message.success('删除成功');
       this.getProjectList();
     })
   }
-  
+  import = () => {
+    this.setState({
+      isShowImportModal: true
+    });
+  }
   render() {
-    const {data, isShowCreateModal, project_id} = this.state;
+    const {data, isShowCreateModal, isShowImportModal, project_id} = this.state;
     return (
       <div className="wrapper">
         <div className="table-filter">
           <Button type="primary" onClick={this.add}>添加项目</Button>
+          <Button type="primary" onClick={this.import}>导入项目</Button>
         </div>
         <Table
           columns={this.columns}
@@ -84,8 +91,13 @@ export default class Index extends PureComponent {
         />
         {isShowCreateModal && (
           <CreateModal
-            onCancel={this.cancelModal}
+            onCancel={() => {this.cancelModal('isShowCreateModal')}}
             project_id={project_id}
+          />
+        )}
+        {isShowImportModal && (
+          <ImportModal
+            onCancel={() => {this.cancelModal('isShowImportModal')}}
           />
         )}
       </div>

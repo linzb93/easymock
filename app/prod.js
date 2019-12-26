@@ -3,8 +3,10 @@ const fs = require('fs-extra');
 const moment = require('moment');
 const {resolve} = require('./util');
 const {setLocal, getLocal} = require('./util/local');
+const hook = require('./hook');
 
 (async () => {
+  await hook();
   try {
     await fs.access(resolve(`./build`));
     if (!getLocal('prod_time') || moment(getLocal('dev_time')).isAfter(getLocal('prod_time'))) {

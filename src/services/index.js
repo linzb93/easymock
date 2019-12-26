@@ -34,6 +34,7 @@ export function deleteProject(params) {
     ...params
   });
 }
+export const uploadProjectUrl = `${baseURL}/project/upload`;
 
 export function getApiPage(params) {
   return service.get(`/api/page?${stringify(params)}`);
