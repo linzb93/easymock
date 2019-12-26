@@ -5,4 +5,4 @@ process.on('uncaughtException', err => {
 });
 process.on('unhandledRejection', err => {
   errorLogger(err);
-})
+});

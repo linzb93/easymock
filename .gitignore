@@ -3,4 +3,5 @@ logs
 run
 build
 .temp
+test.js
 .DS_Store

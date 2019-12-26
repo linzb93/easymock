@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   let filePath = req.path.split('/').slice(3).join('/');
   let metaData;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     metaData = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
   let retData;
   filePath = filePath.replace(prefix.slice(1), '');
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/${filePath}.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/${filePath}.json`));
     retData = JSON.parse(str);
   } catch (e) {
     formatRes(res, {

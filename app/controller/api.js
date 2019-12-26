@@ -13,7 +13,7 @@ exports.page = async (req, res) => {
   const {page, size, project_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -33,7 +33,7 @@ exports.preview = async (req, res) => {
   const type = req.method;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`), 'utf8');
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`), 'utf8');
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -52,7 +52,7 @@ exports.preview = async (req, res) => {
   const url = match.url;
   let originData;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}${url}.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}${url}.json`));
     originData = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -72,7 +72,7 @@ exports.create = async (req, res) => {
   const {project_id, url, type, title, code} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -90,7 +90,7 @@ exports.create = async (req, res) => {
   });
   data.items = items;
   try {
-    await fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
+    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -99,11 +99,11 @@ exports.create = async (req, res) => {
     return;
   }
   try {
-    await fs.writeFile(resolve(`./run/${project_id}${url}.json`), code);
+    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
   } catch (e) {
     const dir = url.split('/').slice(0, -1).join('/');
-    await fs.mkdir(resolve(`./run/${project_id}/${dir}`), {recursive: true});
-    await fs.writeFile(resolve(`./run/${project_id}${url}.json`), code);
+    await fs.mkdir(resolve(`./run/project/${project_id}/${dir}`), {recursive: true});
+    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
   }
   formatRes(res, {
     message: '添加成功'
@@ -115,7 +115,7 @@ exports.update = async (req, res) => {
   const {project_id, api_id, url, type, title, code} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -127,7 +127,7 @@ exports.update = async (req, res) => {
   let match = data.items.filter(item => item.id === api_id)[0];
   if (match.url !== url) {
     try {
-      await fs.unlink(resolve(`./run/${project_id}${match.url}.json`));
+      await fs.unlink(resolve(`./run/project/${project_id}${match.url}.json`));
     } catch (e) {
       formatRes(res, {
         error: 'server',
@@ -143,7 +143,7 @@ exports.update = async (req, res) => {
     title
   };
   try {
-    await fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
+    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -152,11 +152,11 @@ exports.update = async (req, res) => {
     return;
   }
   try {
-    await fs.writeFile(resolve(`./run/${project_id}${url}.json`), code);
+    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
   } catch (e) {
     const dir = url.split('/').slice(0, -1).join('/');
-    await fs.mkdir(resolve(`./run/${project_id}/${dir}`), {recursive: true});
-    await fs.writeFile(resolve(`./run/${project_id}${url}.json`), code);
+    await fs.mkdir(resolve(`./run/project/${project_id}/${dir}`), {recursive: true});
+    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
   }
   formatRes(res, {
     message: '修改成功'
@@ -168,7 +168,7 @@ exports.detail = async (req, res) => {
   const {project_id, api_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -180,7 +180,7 @@ exports.detail = async (req, res) => {
   const match = data.items.filter(item => item.id === api_id)[0];
   let str;
   try {
-    str = await fs.readFile(resolve(`./run/${project_id}${match.url}.json`), 'utf8');
+    str = await fs.readFile(resolve(`./run/project/${project_id}${match.url}.json`), 'utf8');
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -201,7 +201,7 @@ exports.delete = async (req, res) => {
   const {project_id, api_id} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -215,8 +215,8 @@ exports.delete = async (req, res) => {
   const {url} = match[0];
   data.items = items;
   try {
-    await fs.writeFile(resolve(`./run/${project_id}/meta.json`), jsonFormat(data));
-    await fs.unlink(resolve(`./run/${project_id}${url}.json`));
+    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
+    await fs.unlink(resolve(`./run/project/${project_id}${url}.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -234,7 +234,7 @@ exports.download = async (req, res) => {
   const {project_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/${project_id}/meta.json`));
+    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
     data = JSON.parse(str);
   } catch (e) {
     formatRes(res, {
@@ -260,7 +260,7 @@ exports.download = async (req, res) => {
     return;
   });
   archive.pipe(output);
-  archive.directory(`${process.cwd()}/run/${project_id}/`, `${project_id}`);
+  archive.directory(`${process.cwd()}/run/project/${project_id}/`, `${project_id}`);
   archive.finalize();
 }
 

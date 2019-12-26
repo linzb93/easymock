@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api', mainRouter);
 app.use('/', mockRouter);
 hook(app);
+console.log(process.env.NODE_ENV);
 (async () => {
   const port = await detectPort(4000);
   app.listen(port, () => {
