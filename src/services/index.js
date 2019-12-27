@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {stringify} from 'qs';
-const baseURL = 'http://localhost:4000/api';
+const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '/api';
 const service = axios.create({
   baseURL
 });

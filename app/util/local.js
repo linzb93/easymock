@@ -15,7 +15,7 @@ const set = (key, value) => {
   const str = fs.readFileSync(resolve(`./run/data.json`), 'utf8');
   let data = {};
   if (str !== '') {
-    data = JSON.parse(str);  
+    data = JSON.parse(str);
   }
   data[key] = value;
   fs.writeFileSync(resolve(`./run/data.json`), jsonFormat(data));
