@@ -6,6 +6,7 @@ const {setLocal, getLocal} = require('./util/local');
 const hook = require('./hook');
 
 (async () => {
+  process.env.FORCE_COLOR = 1; // shelljs使用的命令行不默认开启支持color
   await hook();
   try {
     await fs.access(resolve(`./build`));

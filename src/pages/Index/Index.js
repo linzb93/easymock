@@ -49,11 +49,13 @@ export default class Index extends PureComponent {
       })
     })
   }
-  cancelModal = name => {
+  cancelModal = (name, reloaded) => {
     this.setState({
       [name]: false
     });
-    this.getProjectList();
+    if (reloaded) {
+      this.getProjectList();
+    }
   }
   edit = project_id => {
     this.setState({
@@ -91,13 +93,13 @@ export default class Index extends PureComponent {
         />
         {isShowCreateModal && (
           <CreateModal
-            onCancel={() => {this.cancelModal('isShowCreateModal')}}
+            onCancel={reloaded => {this.cancelModal('isShowCreateModal', reloaded)}}
             project_id={project_id}
           />
         )}
         {isShowImportModal && (
           <ImportModal
-            onCancel={() => {this.cancelModal('isShowImportModal')}}
+            onCancel={() => {this.cancelModal('isShowImportModal', true)}}
           />
         )}
       </div>

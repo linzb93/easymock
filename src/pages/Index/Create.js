@@ -1,8 +1,9 @@
 import React, {PureComponent} from 'react';
-import {Form, Modal, Button, Input, message} from 'antd';
+import {Form, Modal, Button, Input, message, Tabs, Checkbox} from 'antd';
 import {createProject, getProjectDetail, updateProject} from '../../services';
 
 const FormItem = Form.Item;
+const {TabPane} = Tabs;
 
 class CreateModal extends PureComponent {
   state = {
@@ -45,10 +46,10 @@ class CreateModal extends PureComponent {
       }
     })
   }
-  onCancel = () => {
+  onCancel = submitted => {
     const {onCancel} = this.props;
     if (typeof onCancel === 'function') {
-      onCancel();
+      onCancel(submitted);
     }
   }
   render() {
@@ -59,41 +60,56 @@ class CreateModal extends PureComponent {
       <Modal
         title={`${preTitle}项目`}
         visible
-        onCancel={this.onCancel}
+        onCancel={() => {this.onCancel(false)}}
         footer={[
           <Button type="primary" onClick={this.add}>{preTitle}</Button>,
           <Button onClick={this.onCancel}>取消</Button>
         ]}
       >
-        <Form>
-          <FormItem label="标题">
-            {getFieldDecorator('title', {
-              rules: [
-                {
-                  required: true,
-                  message: '请输入标题'
-                }
-              ],
-              initialValue: data.title || undefined
-            })(
-              <Input />
-            )}
-          </FormItem>
-          <FormItem label="前缀">
-            {getFieldDecorator('prefix', {
-              initialValue: data.prefix || undefined
-            })(
-              <Input />
-            )}
-          </FormItem>
-          <FormItem label="简介">
-            {getFieldDecorator('desc', {
-              initialValue: data.desc || undefined
-            })(
-              <Input />
-            )}
-          </FormItem>
-        </Form>
+        <Tabs>
+          <TabPane tab="基础信息" key="1">
+            <Form>
+              <FormItem label="标题">
+                {getFieldDecorator('title', {
+                  rules: [
+                    {
+                      required: true,
+                      message: '请输入标题'
+                    }
+                  ],
+                  initialValue: data.title || undefined
+                })(
+                  <Input />
+                )}
+              </FormItem>
+              <FormItem label="前缀">
+                {getFieldDecorator('prefix', {
+                  initialValue: data.prefix || undefined
+                })(
+                  <Input />
+                )}
+              </FormItem>
+              <FormItem label="简介">
+                {getFieldDecorator('desc', {
+                  initialValue: data.desc || undefined
+                })(
+                  <Input />
+                )}
+              </FormItem>
+            </Form>
+          </TabPane>
+          {project_id && (
+            <TabPane tab="设置" key="2">
+              <Form>
+                <FormItem>
+                  {getFieldDecorator('open_in_vscode')(
+                    <Checkbox>在VsCode中编辑</Checkbox>
+                  )}
+                </FormItem>
+              </Form>
+            </TabPane>
+          )}
+        </Tabs>
       </Modal>
     )
   }

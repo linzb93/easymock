@@ -64,3 +64,14 @@ export function deleteApi(params) {
 export function exportApi(params) {
   return `${baseURL}/api/download?${stringify(params)}`
 }
+export function cloneApi(params) {
+  return service.post(`/api/clone`, {
+    ...params
+  });
+}
+
+export function openVscode(params) {
+  return service.post(`/open_vscode`, {
+    ...params
+  });
+}

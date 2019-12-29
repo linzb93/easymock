@@ -188,16 +188,17 @@ exports.upload = (req, res) => {
   let ret = {
     has_meta: false, // 根目录下是否有meta.json
     errors: [],
-    urls: []
+    urls: [],
+    streams: []
   }
   const bufferStream = new stream.PassThrough();
   bufferStream.end(req.files[0].buffer);
-  const readStream = bufferStream.pipe(unzip.Parse());
-  readStream.on('entry', entry => {
+  const writeStream = bufferStream.pipe(unzip.Parse());
+  writeStream.on('entry', entry => {
     const filePath = entry.path.split('/').slice(1).join('/');
     if (filePath === 'meta.json') {
       ret.has_meta = true;
-      entry.pipe(through(function(chunk, enc, callback) {
+      const metaStream = entry.pipe(through(function(chunk, enc, callback) {
         const str = chunk.toString();
         let data;
         try {
@@ -252,7 +253,9 @@ exports.upload = (req, res) => {
         }
         this.push(JSON.stringify(data));
         callback();
-      }))
+      }));
+      metaStream.path = entry.path;
+      ret.streams.push(metaStream);
     } else {
       if (!path.extname(filePath)) {
         // 是目录
@@ -265,16 +268,50 @@ exports.upload = (req, res) => {
           remove(ret.urls, item => item === `/${filePath.replace('.json', '')}`);
         }
       }
+      ret.streams.push(entry);
     }
   });
-  readStream.on('close', () => {
+  writeStream.on('close', () => {
     if (!ret.has_meta) {
       ret.errors.unshift('缺少配置文件meta.json');
+      formatRes(res, {
+        data: {
+          success: false,
+          errors: ret.errors
+        }
+      });
     } else if (ret.urls.length) {
       ret.errors.unshift(`${ret.urls.join(', ')} 这些接口缺少对应的返回文件`);
-    } else {}
-    formatRes(res, {
-      data: ret.errors
-    });
+      formatRes(res, {
+        data: {
+          success: false,
+          errors: ret.errors
+        }
+      });
+    } else {
+      const projectUid = new uuid();
+      try {
+        fs.mkdir(resolve(`./run/project/${projectUid}`));
+      } catch (e) {
+        formatRes(res, {
+          error: 'server',
+          message: e
+        });
+        return;
+      }
+      ret.streams.forEach(st => {
+        if (path.extname(st.path)) {
+          st.pipe(fs.createWriteStream(resolve(`./run/project/${projectUid}/${st.path}`)));
+        } else {
+          fs.mkdir(`./run/project/${projectUid}/${st.path}`, {recursive: true});
+        }
+      })
+      formatRes(res, {
+        data: {
+          success: true
+        },
+        message: '项目导入成功'
+      });
+    }
   });
 }

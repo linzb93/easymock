@@ -1,14 +1,24 @@
 const path = require('path');
 const PrettyError = require('pretty-error');
 const prettier = require('prettier');
+const log4js = require('log4js');
 const pe = new PrettyError();
+log4js.configure({
+  appenders: { cheese: { type: 'file', filename: 'logs/error.log' } },
+  categories: { default: { appenders: ['cheese'], level: 'error' } }
+});
+const logger = log4js.getLogger('cheese');
 
 exports.resolve = function(dir) {
   return path.resolve(process.cwd(), dir);
 }
 
 exports.errorLogger = err => {
-  console.log(pe.render(err));
+  if (process.env.NODE_ENV === 'development') {
+    console.log(pe.render(err));
+  } else {
+    logger.error(err);
+  }
 }
 
 // 标准输出

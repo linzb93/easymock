@@ -1,11 +1,13 @@
 import React, {PureComponent} from 'react';
-import {Table, Button, message} from 'antd';
+import {Table, Button, message, Typography} from 'antd';
 import Preview from './Preview';
-import {getProjectDetail, getApiPage, deleteApi,exportApi} from '../../services';
+import {getProjectDetail, getApiPage, deleteApi,exportApi, cloneApi, openVscode} from '../../services';
+
+const {Text, Paragraph, Title} = Typography;
 
 export default class List extends PureComponent {
   state = {
-    prefix: '',
+    meta: {},
     data: [],
     isShowPreviewModal: false,
     project_id: '',
@@ -27,7 +29,7 @@ export default class List extends PureComponent {
         <div className="table-opr-wrap">
           <Button type="primary" size="small" onClick={() => {this.edit(record.id)}}>编辑</Button>
           <Button type="primary" size="small" onClick={() => {this.preview(record.id, record.type)}}>预览</Button>
-          <Button type="primary" size="small" onClick={() => {this.copy(record.id)}}>复制</Button>
+          <Button type="primary" size="small" onClick={() => {this.clone(record.id)}}>复制</Button>
           <Button type="danger" size="small" onClick={() => {this.delete(record.id)}}>删除</Button>
         </div>
       )
@@ -39,10 +41,12 @@ export default class List extends PureComponent {
       project_id
     })
     .then(res => {
-      const {prefix} = res.data;
       this.setState({
         project_id,
-        prefix: `${project_id}${prefix}`
+        meta: {
+          ...res.data,
+          prefix: `${project_id}${res.data.prefix}`
+        }
       }, () => {
         this.fetchList();
       })
@@ -68,6 +72,13 @@ export default class List extends PureComponent {
     const {project_id} = this.state;
     const {history} = this.props;
     history.push(`/project/${project_id}/update/${id}`);
+    // openVscode({
+    //   project_id,
+    //   api_id: id
+    // })
+    // .then(res => {
+    //   message.success(res.message);
+    // });
   }
   delete = id => {
     const {project_id} = this.state;
@@ -86,6 +97,17 @@ export default class List extends PureComponent {
       api_id,
       fetch_type: type
     })
+  }
+  clone = api_id => {
+    const {project_id} = this.state;
+    cloneApi({
+      project_id,
+      api_id
+    })
+    .then(() => {
+      message.success('复制成功');
+      this.fetchList();
+    });
   }
   export = () => {
     const {project_id} = this.state;
@@ -113,12 +135,14 @@ export default class List extends PureComponent {
       project_id,
       api_id,
       fetch_type,
-      prefix
+      meta
     } = this.state;
     return (
       <div className="wrapper">
+        <Title style={{marginTop: 20}}>{meta.title}</Title>
+        <Paragraph>接口前缀：<Text copyable>{`${window.location.origin}/mock/${meta.prefix}`}</Text></Paragraph>
+        <Paragraph>项目id：{project_id}</Paragraph>
         <div className="table-filter">
-          <p>接口前缀：/mock/{prefix}</p>
           <Button type="primary" onClick={this.add}>添加接口</Button>
           <Button type="primary" onClick={this.export}>导出接口</Button>
         </div>

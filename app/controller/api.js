@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-// const ow = require('ow');
 const uuid = require('uuid/v4');
 const Mock = require('mockjs');
 const {remove} = require('lodash');
@@ -10,7 +9,7 @@ const {formatRes, resolve, jsonFormat} = require('../util');
 
 // 获取项目api分页
 exports.page = async (req, res) => {
-  const {page, size, project_id} = req.query;
+  const {page = 1, size = 10, project_id} = req.query;
   let data;
   try {
     const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
@@ -23,7 +22,9 @@ exports.page = async (req, res) => {
     return;
   }
   formatRes(res, {
-    data: data.items
+    data: data.items.filter((_, index) => {
+      return index >= (page - 1) * size && index < page * size
+    })
   })
 }
 
@@ -278,5 +279,40 @@ exports.upload = (req, res) => {
         data: ''
       });
     })
+  });
+}
+
+// 复制项目api
+exports.clone = async (req, res) => {
+  const {project_id, api_id} = req.body;
+  let data;
+  try {
+    const str = await fs.readFile(`./run/project/${project_id}/meta.json`);
+    data = JSON.parse(str);
+  } catch (e) {
+    formatRes(res, {
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  const match = data.items.filter(item => item.id === api_id)[0];
+  const newApi = {...match};
+  newApi.id = uuid();
+  newApi.title += `${new Date().getSeconds()}`;
+  newApi.url += `_${new Date().getTime()}`;
+  data.items.unshift(newApi);
+  try {
+    fs.copyFile(resolve(`./run/project/${project_id}${match.url}.json`), resolve(`./run/project/${project_id}${newApi.url}.json`));
+    fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
+  } catch (e) {
+    formatRes(res, {
+      error: 'server',
+      message: e
+    });
+    return;
+  }
+  formatRes(res, {
+    message: '接口复制成功'
   });
 }
