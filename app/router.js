@@ -21,8 +21,7 @@ router.post('/api/update', controller.api.update); // 更新项目api
 router.post('/api/delete', controller.api.delete); // 删除项目api
 router.get('/api/detail', controller.api.detail); // 获取项目api详情
 router.post('/api/clone', controller.api.clone); // 复制项目api
-router.post('/api/upload', upload.any(), controller.api.upload); // 上传项目api压缩包
-router.get('/api/download', controller.api.download); // 下载项目api压缩包
+router.get('/api/download', controller.api.download); // 下载项目
 
 // other
 router.post('/open_vscode', controller.other.open_vscode); // 在vscode里编辑接口

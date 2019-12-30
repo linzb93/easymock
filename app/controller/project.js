@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const uuid = require('uuid/v4');
 const del = require('del');
 const stream = require('stream');
+const bytes = require('bytes');
 const unzip = require('unzip');
 const path = require('path');
 const through = require('through2');
@@ -19,7 +20,9 @@ exports.list = async (_, res) => {
     });
     return;
   }
-  const pMap = dirs.map(async dir => {
+  const pMap = dirs
+  .filter(dir => !path.extname(dir)) // 避免Mac OS下读取.DS_Store
+  .map(async dir => {
     let data;
     try {
       const str = await fs.readFile(resolve(`./run/project/${dir}/meta.json`));
@@ -30,6 +33,7 @@ exports.list = async (_, res) => {
     return Promise.resolve({
       title: data.title,
       project_id: dir,
+      prefix: data.prefix,
       count: data.items.length
     });
   });
@@ -184,6 +188,14 @@ exports.delete = async (req,res) => {
  * 6.如果不能到第5步，把上面所有的错误都返回给前端
  */
 exports.upload = (req, res) => {
+  const originFile = req.files[0];
+  if (originFile.size > bytes('1MB')) {
+    formatRes(res, {
+      error: 'client',
+      message: '上传文件不得大于1M'
+    });
+    return;
+  }
   let ret = {
     has_meta: false, // 根目录下是否有meta.json
     meta_error: false, // meta.json是否有误
@@ -192,7 +204,7 @@ exports.upload = (req, res) => {
     streams: []
   }
   const bufferStream = new stream.PassThrough();
-  bufferStream.end(req.files[0].buffer);
+  bufferStream.end(originFile.buffer);
   const writeStream = bufferStream.pipe(unzip.Parse());
   writeStream.on('entry', async entry => {
     const filePath = entry.path.split('/').slice(1).join('/');

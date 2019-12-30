@@ -268,23 +268,6 @@ exports.download = async (req, res) => {
   archive.finalize();
 }
 
-// 上传项目api压缩包
-exports.upload = (req, res) => {
-  const oriBuffer = req.files[0].buffer;
-  fs.createReadStream(oriBuffer)
-  .pipe(unzip.Parse())
-  .on('entry', entry => {
-    entry
-    .pipe(through(function(chunk, _, callback) {}))
-    .pipe()
-    .on('end', () => {
-      formatRes(res, {
-        data: ''
-      });
-    })
-  });
-}
-
 // 复制项目api
 exports.clone = async (req, res) => {
   const {project_id, api_id} = req.body;

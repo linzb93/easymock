@@ -1,9 +1,20 @@
 import React, {PureComponent} from 'react';
-import {Table, Button, message, Typography} from 'antd';
+import {Table, Button, message, Typography, Tag} from 'antd';
 import Preview from './Preview';
-import {getProjectDetail, getApiPage, deleteApi,exportApi, cloneApi, openVscode} from '../../services';
+import {getProjectDetail, getApiPage, deleteApi,exportApi, cloneApi} from '../../services';
 
 const {Text, Paragraph, Title} = Typography;
+
+function TypeTag({type}) {
+  const typeMap = {
+    get: 'blue',
+    post: 'green',
+    delete: 'red',
+    patch: 'purple',
+    put: 'cyan'
+  };
+  return <Tag color={typeMap[type]}>{type}</Tag>
+}
 
 export default class List extends PureComponent {
   state = {
@@ -32,7 +43,8 @@ export default class List extends PureComponent {
     },
     {
       title: '方法',
-      dataIndex: 'type'
+      dataIndex: 'type',
+      render: text => <TypeTag type={text} />
     },
     {
       title: '操作',

@@ -21,6 +21,14 @@ export default class Index extends PureComponent {
       )
     },
     {
+      title: '接口地址',
+      dataIndex: 'prefix'
+    },
+    {
+      title: '接口数',
+      dataIndex: 'count'
+    },
+    {
       title: '操作',
       render: (text, record) => (
         <div className="table-opr-wrap">
@@ -88,6 +96,7 @@ export default class Index extends PureComponent {
         <Table
           columns={this.columns}
           dataSource={data}
+          pagination={false}
           rowKey="project_id"
           bordered
         />
@@ -99,7 +108,7 @@ export default class Index extends PureComponent {
         )}
         {isShowImportModal && (
           <ImportModal
-            onCancel={() => {this.cancelModal('isShowImportModal', true)}}
+            onCancel={reloaded => {this.cancelModal('isShowImportModal', reloaded)}}
           />
         )}
       </div>

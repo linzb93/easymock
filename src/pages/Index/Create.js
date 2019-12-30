@@ -1,9 +1,8 @@
 import React, {PureComponent} from 'react';
-import {Form, Modal, Button, Input, message, Tabs, Checkbox} from 'antd';
+import {Form, Modal, Button, Input, message, Checkbox, Card} from 'antd';
 import {createProject, getProjectDetail, updateProject} from '../../services';
 
 const FormItem = Form.Item;
-const {TabPane} = Tabs;
 
 class CreateModal extends PureComponent {
   state = {
@@ -66,50 +65,46 @@ class CreateModal extends PureComponent {
           <Button onClick={this.onCancel}>取消</Button>
         ]}
       >
-        <Tabs>
-          <TabPane tab="基础信息" key="1">
-            <Form>
-              <FormItem label="标题">
-                {getFieldDecorator('title', {
-                  rules: [
-                    {
-                      required: true,
-                      message: '请输入标题'
-                    }
-                  ],
-                  initialValue: data.title || undefined
-                })(
-                  <Input />
-                )}
-              </FormItem>
-              <FormItem label="前缀">
-                {getFieldDecorator('prefix', {
-                  initialValue: data.prefix || undefined
-                })(
-                  <Input />
-                )}
-              </FormItem>
-              <FormItem label="简介">
-                {getFieldDecorator('desc', {
-                  initialValue: data.desc || undefined
-                })(
-                  <Input />
-                )}
-              </FormItem>
-            </Form>
-          </TabPane>
+        <Form>
+          <Card title={project_id ? '基础信息' : ''} bordered={false}>
+            <FormItem label="标题">
+              {getFieldDecorator('title', {
+                rules: [
+                  {
+                    required: true,
+                    message: '请输入标题'
+                  }
+                ],
+                initialValue: data.title || undefined
+              })(
+                <Input />
+              )}
+            </FormItem>
+            <FormItem label="前缀">
+              {getFieldDecorator('prefix', {
+                initialValue: data.prefix || undefined
+              })(
+                <Input />
+              )}
+            </FormItem>
+            <FormItem label="简介">
+              {getFieldDecorator('desc', {
+                initialValue: data.desc || undefined
+              })(
+                <Input />
+              )}
+            </FormItem>
+          </Card>
           {project_id && (
-            <TabPane tab="设置" key="2">
-              <Form>
-                <FormItem>
-                  {getFieldDecorator('open_in_vscode')(
-                    <Checkbox>在VsCode中编辑</Checkbox>
-                  )}
-                </FormItem>
-              </Form>
-            </TabPane>
+            <Card title="设置" bordered={false}>
+              <FormItem>
+                {getFieldDecorator('open_in_vscode')(
+                  <Checkbox>在VsCode中编辑</Checkbox>
+                )}
+              </FormItem>
+            </Card>
           )}
-        </Tabs>
+        </Form>
       </Modal>
     )
   }
