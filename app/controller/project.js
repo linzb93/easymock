@@ -4,7 +4,6 @@ const del = require('del');
 const stream = require('stream');
 const unzip = require('unzip');
 const path = require('path');
-const {remove} = require('lodash');
 const through = require('through2');
 const {formatRes, resolve, jsonFormat} = require('../util');
 
@@ -187,6 +186,7 @@ exports.delete = async (req,res) => {
 exports.upload = (req, res) => {
   let ret = {
     has_meta: false, // 根目录下是否有meta.json
+    meta_error: false, // meta.json是否有误
     errors: [],
     urls: [],
     streams: []
@@ -194,7 +194,7 @@ exports.upload = (req, res) => {
   const bufferStream = new stream.PassThrough();
   bufferStream.end(req.files[0].buffer);
   const writeStream = bufferStream.pipe(unzip.Parse());
-  writeStream.on('entry', entry => {
+  writeStream.on('entry', async entry => {
     const filePath = entry.path.split('/').slice(1).join('/');
     if (filePath === 'meta.json') {
       ret.has_meta = true;
@@ -205,19 +205,25 @@ exports.upload = (req, res) => {
           data = JSON.parse(str);
         } catch(e) {
           ret.errors.push('meta.json 文件格式不正确！');
+          meta_error = true;
+          return;
         }
         if (data.title === undefined || data.title === '') {
-          ret.errors.push('项目名称(title)不存在！');
+          ret.errors.push('项目名称（title）不存在！');
+          meta_error = true;
         }
         if (data.prefix) {
           if (!data.prefix.startsWith('/')) {
             ret.errors.push('项目地址前缀（prefix）必须以“/”开头');
+            meta_error = true;
           } else if (data.prefix.endsWith('/')) {
             ret.errors.push('项目地址前缀（prefix）不需要以“/”结尾');
+            meta_error = true;
           }
         }
         if (!data.items || !Array.isArray(data.items)) {
           ret.errors.push('项目api列表（items）必须是数组！');
+          meta_error = true;
         } else {
           // 如果出现接口不规范的，提示一次就可以了
           let hasError = false;
@@ -226,16 +232,19 @@ exports.upload = (req, res) => {
               return;
             }
             if (!item.title) {
-              ret.errors.push('有个接口名称(title)不存在！');
+              ret.errors.push('有个接口名称（title）不存在！');
               hasError = true;
+              meta_error = true;
             }
             if (!['get', 'post', 'delete', 'patch', 'put'].includes(item.type)) {
-              ret.errors.push('请求类型(type)只能是get, post, delete, patch, put');
+              ret.errors.push('请求类型（type）只能是get, post, delete, patch, put');
               hasError = true;
+              meta_error = true;
             }
             if (!item.url) {
-              ret.errors.push('有个接口地址(url)不存在！');
+              ret.errors.push('有个接口地址（url）不存在！');
               hasError = true;
+              meta_error = true;
             }
           });
           // 接口没有不规范的，为每个接口打上uuid
@@ -248,6 +257,7 @@ exports.upload = (req, res) => {
             ret.urls.forEach(x => s.add(x));
             if (s.size < ret.urls.length) {
               ret.errors.push('至少有两个接口url重复了');
+              meta_error = true;
             }
           }
         }
@@ -257,31 +267,49 @@ exports.upload = (req, res) => {
       metaStream.path = entry.path;
       ret.streams.push(metaStream);
     } else {
-      if (!path.extname(filePath)) {
-        // 是目录
-      } else if (path.extname(filePath) == '.json') {
-        // 只处理json文件
-        const idx = ret.urls.findIndex(item => item === `/${filePath.replace('.json', '')}`);
-        if (idx === -1) {
-          ret.errors.push(`${filePath} 没有对应的配置项`);
-        } else {
-          remove(ret.urls, item => item === `/${filePath.replace('.json', '')}`);
-        }
+      if (ret.meta_error) {
+        return;
       }
-      ret.streams.push(entry);
+      // 只收文件夹和json文件
+      if (!path.extname(filePath)) {
+        ret.streams.push(entry);
+      } else if (path.extname(filePath) == '.json') {
+        ret.streams.push(entry);
+      }
     }
   });
   writeStream.on('close', () => {
     if (!ret.has_meta) {
-      ret.errors.unshift('缺少配置文件meta.json');
+      formatRes(res, {
+        data: {
+          success: false,
+          errors: ['缺少配置文件meta.json']
+        }
+      });
+      return;
+    } else if (ret.urls.meta_error) {
       formatRes(res, {
         data: {
           success: false,
           errors: ret.errors
         }
       });
-    } else if (ret.urls.length) {
-      ret.errors.unshift(`${ret.urls.join(', ')} 这些接口缺少对应的返回文件`);
+      return;
+    }
+    const fileUrlList = ret.streams
+    .filter(st => {
+      const npath = st.path.split('/').slice(1).join('/');
+      return path.extname(npath) && npath !== 'meta.json';
+    })
+    .map(st => {
+      return `/${st.path.split('/').slice(1).join('/').replace('.json', '')}`; 
+    });
+    ret.urls.forEach(item => {
+      if (!fileUrlList.includes(item)) {
+        ret.errors.push(`接口 ${item} 缺少返回文件`);
+      }
+    });
+    if (ret.errors.length) {
       formatRes(res, {
         data: {
           success: false,
@@ -289,7 +317,8 @@ exports.upload = (req, res) => {
         }
       });
     } else {
-      const projectUid = new uuid();
+      // 验证全部通过，可以导入
+      const projectUid = uuid();
       try {
         fs.mkdir(resolve(`./run/project/${projectUid}`));
       } catch (e) {
@@ -300,10 +329,14 @@ exports.upload = (req, res) => {
         return;
       }
       ret.streams.forEach(st => {
-        if (path.extname(st.path)) {
-          st.pipe(fs.createWriteStream(resolve(`./run/project/${projectUid}/${st.path}`)));
+        const npath = `/${st.path.split('/').slice(1).join('/')}`;
+        if (path.extname(npath)) {
+          if (npath !== '/meta.json' && !ret.urls.includes(npath.replace('.json', ''))) {
+            return;
+          }
+          st.pipe(fs.createWriteStream(resolve(`./run/project/${projectUid}${npath}`)));
         } else {
-          fs.mkdir(`./run/project/${projectUid}/${st.path}`, {recursive: true});
+          fs.mkdir(`./run/project/${projectUid}${npath}`, {recursive: true});
         }
       })
       formatRes(res, {

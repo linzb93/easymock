@@ -8,7 +8,14 @@ const {Text, Paragraph, Title} = Typography;
 export default class List extends PureComponent {
   state = {
     meta: {},
-    data: [],
+    data: {
+      list:[],
+      total: 0
+    },
+    pagination: {
+      size: 10,
+      current: 1
+    },
     isShowPreviewModal: false,
     project_id: '',
     api_id: '',
@@ -22,6 +29,10 @@ export default class List extends PureComponent {
     {
       title: '地址',
       dataIndex: 'url'
+    },
+    {
+      title: '方法',
+      dataIndex: 'type'
     },
     {
       title: '操作',
@@ -53,15 +64,27 @@ export default class List extends PureComponent {
     });
   }
   fetchList = () => {
-    const {project_id} = this.state;
+    const {project_id, pagination: {current, size}} = this.state;
     getApiPage({
-      project_id
+      project_id,
+      page: current,
+      size
     })
     .then(res => {
       this.setState({
         data: res.data
       })
     })
+  }
+  changePaginationCurrent = current => {
+    this.setState(prevState => ({
+      pagination: {
+        ...prevState.pagination,
+        current
+      }
+    }), () => {
+      this.fetchList();
+    });
   }
   add = () => {
     const {project_id} = this.state;
@@ -135,21 +158,30 @@ export default class List extends PureComponent {
       project_id,
       api_id,
       fetch_type,
-      meta
+      meta,
+      pagination
     } = this.state;
     return (
       <div className="wrapper">
         <Title style={{marginTop: 20}}>{meta.title}</Title>
-        <Paragraph>接口前缀：<Text copyable>{`${window.location.origin}/mock/${meta.prefix}`}</Text></Paragraph>
+        <Paragraph>接口前缀：<Text copyable>{`${window.location.hostname}:4000/mock/${meta.prefix}`}</Text></Paragraph>
         <Paragraph>项目id：{project_id}</Paragraph>
         <div className="table-filter">
           <Button type="primary" onClick={this.add}>添加接口</Button>
           <Button type="primary" onClick={this.export}>导出接口</Button>
         </div>
         <Table
-          dataSource={data}
+          dataSource={data.list}
           columns={this.columns}
           rowKey="api_id"
+          pagination={{
+            total: data.total,
+            showTotal: total => `共有 ${total} 条记录`,
+            pageSize: pagination.size,
+            onChange: this.changePaginationCurrent,
+            current: pagination.current,
+            defaultCurrent: pagination.current,
+          }}
           bordered
         />
         {isShowPreviewModal && (

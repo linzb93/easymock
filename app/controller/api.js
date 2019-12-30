@@ -22,9 +22,12 @@ exports.page = async (req, res) => {
     return;
   }
   formatRes(res, {
-    data: data.items.filter((_, index) => {
-      return index >= (page - 1) * size && index < page * size
-    })
+    data: {
+      list: data.items.filter((_, index) => {
+        return index >= (page - 1) * size && index < page * size
+      }),
+      total: data.items.length
+    }
   })
 }
 

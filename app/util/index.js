@@ -52,3 +52,12 @@ exports.jsonFormat = data => {
     parser: 'json'
   })
 }
+
+// 遍历数组，满足条件即可退出
+exports.each = (list, callback) => {
+  for (let i = 0, len = list.length; i < len; i++) {
+    if ( callback(list[i], i) === false ) {
+      break;
+    }
+  }
+}
