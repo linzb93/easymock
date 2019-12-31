@@ -25,7 +25,7 @@ router.get('/api/download', controller.api.download); // 下载项目
 
 // other
 router.post('/open_vscode', controller.other.open_vscode); // 在vscode里编辑接口
-
+router.get('/download', controller.other.download); // 文件下载
 // mock
 mockRouter.all('/mock/:project_id/*', controller.mock); // mock接口
 

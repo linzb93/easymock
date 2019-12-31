@@ -1,5 +1,6 @@
 import React, {PureComponent} from 'react';
 import {Table, Button, message, Typography, Tag} from 'antd';
+import copy from 'copy-to-clipboard';
 import Preview from './Preview';
 import {getProjectDetail, getApiPage, deleteApi,exportApi, cloneApi} from '../../services';
 
@@ -35,16 +36,19 @@ export default class List extends PureComponent {
   columns = [
     {
       title: '名称',
-      dataIndex: 'title'
+      dataIndex: 'title',
+      width: '25%'
     },
     {
       title: '地址',
-      dataIndex: 'url'
+      dataIndex: 'url',
+      width: '25%'
     },
     {
       title: '方法',
       dataIndex: 'type',
-      render: text => <TypeTag type={text} />
+      render: text => <TypeTag type={text} />,
+      width: '10%'
     },
     {
       title: '操作',
@@ -52,7 +56,8 @@ export default class List extends PureComponent {
         <div className="table-opr-wrap">
           <Button type="primary" size="small" onClick={() => {this.edit(record.id)}}>编辑</Button>
           <Button type="primary" size="small" onClick={() => {this.preview(record.id, record.type)}}>预览</Button>
-          <Button type="primary" size="small" onClick={() => {this.clone(record.id)}}>复制</Button>
+          <Button type="primary" size="small" onClick={() => {this.clone(record.id)}}>克隆</Button>
+          <Button type="primary" size="small" onClick={() => {this.copyToClipboard(record.url)}}>复制接口地址</Button>
           <Button type="danger" size="small" onClick={() => {this.delete(record.id)}}>删除</Button>
         </div>
       )
@@ -97,6 +102,12 @@ export default class List extends PureComponent {
     }), () => {
       this.fetchList();
     });
+  }
+  copyToClipboard = url => {
+    const {meta} = this.state;
+    copy(`${window.location.hostname}:4000/mock/${meta.prefix}${url}`);
+    message.success('接口复制成功');
+    
   }
   add = () => {
     const {project_id} = this.state;

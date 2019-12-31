@@ -3,7 +3,7 @@ const del = require('del');
 const semver = require('semver');
 const {resolve} = require('./util');
 
-module.exports = async app => {
+module.exports = async () => {
   // Node v10.12.0支持递归创建文件夹
   if (semver.lt(process.version, '10.12.0')) {
     throw new Error('Node版本过低，请升级至v10.12.0以上');

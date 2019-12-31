@@ -2,6 +2,7 @@ const shell = require('shelljs');
 const fs = require('fs-extra');
 const address = require('address');
 const {resolve, formatRes} = require('../util');
+
 exports.open_vscode = async (req, res) => {
   const {ip, body} = req;
   const {project_id, api_id} = body;
@@ -25,4 +26,10 @@ exports.open_vscode = async (req, res) => {
   formatRes(res, {
     message: '已在vscode中打开'
   });
+}
+
+// 文件下载
+exports.download = (req, res) => {
+  const {fileName} = req.query;
+  res.download(resolve(`./app/attachment/${fileName}`));
 }

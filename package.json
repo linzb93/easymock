@@ -20,7 +20,6 @@
     "pretty-error": "^2.1.1",
     "react": "^16.12.0",
     "react-ace": "^8.0.0",
-    "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.12.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.3.0",
@@ -29,8 +28,9 @@
   },
   "scripts": {
     "start": "node app/start.js",
-    "start:server": "cross-env NODE_ENV=development node app/start.js",
+    "start:server": "cross-env NODE_ENV=development node app/start",
     "server": "nodemon app",
+    "manmade": "node app/script",
     "prod": "cross-env NODE_ENV=production node app/prod"
   },
   "nodemonConfig": {
