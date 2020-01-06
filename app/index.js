@@ -12,7 +12,7 @@ require('./uncaughtError');
 // 中间件
 app.use(cors());
 app.use('/', express.static('build'));
-app.use(limited(5)); // 限制1秒只能访问5次接口
+app.use(limited(10)); // 限制1秒只能访问5次接口
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // 路由
