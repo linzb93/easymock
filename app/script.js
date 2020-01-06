@@ -25,7 +25,11 @@ const {resolve} = require('./util');
       .then(() => {
         console.log('清理成功');
         afterExec();
-      });
+      })
+      .catch(() => {
+        console.log('文件不存在，不需要清理');
+        afterExec();
+      })
       break;
     case '清理日志':
       fs.writeFile(resolve(`./logs/error.log`), '')
@@ -40,7 +44,9 @@ const {resolve} = require('./util');
   }
 
   function afterExec() {
-    cliCursor.show();
-    clearConsole();
+    setTimeout(() => {
+      clearConsole();
+      cliCursor.show();
+    }, 1000);
   }
 })();
