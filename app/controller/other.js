@@ -8,8 +8,7 @@ exports.open_vscode = async (req, res) => {
   const {project_id, api_id} = body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',

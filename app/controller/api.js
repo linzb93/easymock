@@ -12,8 +12,7 @@ exports.page = async (req, res) => {
   const {page = 1, size = 10, project_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -37,8 +36,7 @@ exports.preview = async (req, res) => {
   const type = req.method;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`), 'utf8');
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`), 'utf8');
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -56,8 +54,7 @@ exports.preview = async (req, res) => {
   const url = match.url;
   let originData;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}${url}.json`));
-    originData = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}${url}.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -76,8 +73,7 @@ exports.create = async (req, res) => {
   const {project_id, url, type, title, code} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -119,8 +115,7 @@ exports.update = async (req, res) => {
   const {project_id, api_id, url, type, title, code} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -172,8 +167,7 @@ exports.detail = async (req, res) => {
   const {project_id, api_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -205,8 +199,7 @@ exports.delete = async (req, res) => {
   const {project_id, api_id} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -238,8 +231,7 @@ exports.download = async (req, res) => {
   const {project_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJson(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -273,8 +265,7 @@ exports.clone = async (req, res) => {
   const {project_id, api_id} = req.body;
   let data;
   try {
-    const str = await fs.readFile(`./run/project/${project_id}/meta.json`);
-    data = JSON.parse(str);
+    data = await fs.readJson(`./run/project/${project_id}/meta.json`);
   } catch (e) {
     formatRes(res, {
       error: 'server',

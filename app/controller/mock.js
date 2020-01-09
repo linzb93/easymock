@@ -7,8 +7,7 @@ module.exports = async (req, res) => {
   let filePath = req.path.split('/').slice(3).join('/');
   let metaData;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    metaData = JSON.parse(str);
+    metaData = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
@@ -20,8 +19,7 @@ module.exports = async (req, res) => {
   let retData;
   filePath = filePath.replace(prefix.slice(1), '');
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/${filePath}.json`));
-    retData = JSON.parse(str);
+    retData = await fs.readJSON(resolve(`./run/project/${project_id}/${filePath}.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
