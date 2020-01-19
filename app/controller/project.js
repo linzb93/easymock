@@ -30,12 +30,12 @@ exports.list = async (_, res) => {
     } catch (e) {
       return Promise.reject(e);
     }
-    return Promise.resolve({
+    return {
       title: data.title,
       project_id: dir,
       prefix: data.prefix,
       count: data.items.length
-    });
+    };
   });
   let list;
   try {
