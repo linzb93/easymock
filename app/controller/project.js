@@ -25,8 +25,7 @@ exports.list = async (_, res) => {
   .map(async dir => {
     let data;
     try {
-      const str = await fs.readFile(resolve(`./run/project/${dir}/meta.json`));
-      data = JSON.parse(str);
+      data = await fs.readJSON(resolve(`./run/project/${dir}/meta.json`));
     } catch (e) {
       return Promise.reject(e);
     }
@@ -91,8 +90,7 @@ exports.update = async (req,res) => {
   const {title, desc, prefix = '', project_id} = req.body;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     if (e.code === 'ENOENT') {
       formatRes(res, {
@@ -133,8 +131,7 @@ exports.detail = async (req,res) => {
   const {project_id} = req.query;
   let data;
   try {
-    const str = await fs.readFile(resolve(`./run/project/${project_id}/meta.json`));
-    data = JSON.parse(str);
+    data = await fs.readJson(resolve(`./run/project/${project_id}/meta.json`));
   } catch (e) {
     formatRes(res, {
       error: 'server',
