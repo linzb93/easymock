@@ -2,6 +2,7 @@ const path = require('path');
 const PrettyError = require('pretty-error');
 const prettier = require('prettier');
 const log4js = require('log4js');
+const errorex = require('error-ex');
 const pe = new PrettyError();
 log4js.configure({
   appenders: { cheese: { type: 'file', filename: 'logs/error.log' } },
@@ -61,3 +62,7 @@ exports.each = (list, callback) => {
     }
   }
 }
+
+// error type
+exports.ServerError = errorex('ServerError');
+exports.ClientError = errorex('ClientError');

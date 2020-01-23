@@ -1,9 +1,6 @@
 const fs = require('fs-extra');
-const uuid = require('uuid/v4');
 const Mock = require('mockjs');
 const {remove} = require('lodash');
-const through = require('through2');
-const unzip = require('unzip');
 const archiver = require('archiver');
 const {formatRes, resolve, jsonFormat} = require('../util');
 

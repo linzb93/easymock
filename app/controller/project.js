@@ -1,52 +1,22 @@
 const fs = require('fs-extra');
 const uuid = require('uuid/v4');
-const del = require('del');
 const stream = require('stream');
 const bytes = require('bytes');
 const unzip = require('unzip');
 const path = require('path');
 const through = require('through2');
 const {formatRes, resolve, jsonFormat} = require('../util');
+const {project} = require('../util/db');
 
 // 获取项目列表
 exports.list = async (_, res) => {
-  let dirs;
-  try {
-    dirs = await fs.readdir(resolve('./run/project'));
-  } catch(e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  }
-  const pMap = dirs
-  .filter(dir => !path.extname(dir)) // 避免Mac OS下读取.DS_Store
-  .map(async dir => {
-    let data;
-    try {
-      data = await fs.readJSON(resolve(`./run/project/${dir}/meta.json`));
-    } catch (e) {
-      return Promise.reject(e);
-    }
-    return {
-      title: data.title,
-      project_id: dir,
-      prefix: data.prefix,
-      count: data.items.length
-    };
-  });
   let list;
   try {
-    list = await Promise.all(pMap);
-  } catch(e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    list = await project.select('*');
+  } catch (e) {
+    throw e;
   }
-  formatRes(res, {
+  res.send({
     message: '发送成功',
     data: list
   });
@@ -55,31 +25,12 @@ exports.list = async (_, res) => {
 // 创建项目
 exports.create = async (req, res) => {
   const {title, desc, prefix = ''} = req.body;
-  const uid = uuid();
   try {
-    await fs.mkdir(resolve(`./run/project/${uid}`));
+    await project.create({title, desc, prefix = ''});
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    throw e;
   }
-  try {
-    await fs.writeFile(resolve(`./run/project/${uid}/meta.json`), jsonFormat({
-      title,
-      desc,
-      prefix,
-      items: []
-    }))
-  } catch(e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  }
-  formatRes(res, {
+  res.send({
     data: null,
     message: '创建成功'
   });
@@ -88,39 +39,12 @@ exports.create = async (req, res) => {
 // 更新项目
 exports.update = async (req,res) => {
   const {title, desc, prefix = '', project_id} = req.body;
-  let data;
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
+    await project.update({project_id, title, desc, prefix});
   } catch (e) {
-    if (e.code === 'ENOENT') {
-      formatRes(res, {
-        error: 'client',
-        message: 'project不存在'
-      });
-    } else {
-      formatRes(res, {
-        error: 'server',
-        message: e
-      });
-    }
-    return;
+    throw e;
   }
-  data = {
-    ...data,
-    title,
-    desc,
-    prefix
-  }
-  try {
-    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  }
-  formatRes(res, {
+  res.send({
     data: null,
     message: '更新成功'
   });
@@ -131,44 +55,24 @@ exports.detail = async (req,res) => {
   const {project_id} = req.query;
   let data;
   try {
-    data = await fs.readJson(resolve(`./run/project/${project_id}/meta.json`));
+    data = await project.selectOne({
+      id: project_id
+    }).getMeta();
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    throw e;
   }
-  const {title, desc, prefix = ''} = data;
-  formatRes(res, {
-    data: {
-      title,
-      desc,
-      prefix
-    }
-  });
+  res.send({data});
 }
 
 // 删除项目
 exports.delete = async (req,res) => {
   const {project_id} = req.body;
   try {
-    await del(resolve(`./run/project/${project_id}`));
+    await project.delete({id: project_id});
   } catch(e) {
-    if (e.code === 'ENOENT') {
-      formatRes(res, {
-        error: 'client',
-        message: 'project不存在'
-      });
-    } else {
-      formatRes(res, {
-        error: 'server',
-        message: e
-      });
-    }
-    return;
+    throw e;
   }
-  formatRes(res, {
+  res.send({
     data: null,
     message: '删除成功'
   });

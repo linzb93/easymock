@@ -1,4 +1,4 @@
-// 限制访问频率
+// 限制每秒访问次数
 const moment = require('moment');
 
 const reqTimeList = [];
