@@ -1,292 +1,191 @@
-const fs = require('fs-extra');
 const Mock = require('mockjs');
-const {remove} = require('lodash');
-const archiver = require('archiver');
-const {formatRes, resolve, jsonFormat} = require('../util');
+const {ClientError} = require('../util');
+const {project} = require('../util/db');
 
 // 获取项目api分页
-exports.page = async (req, res) => {
+exports.page = async (req, res, next) => {
   const {page = 1, size = 10, project_id} = req.query;
+  let match = project.selectOne({
+    id: project_id
+  });
   let data;
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    data = await match.select({
+      offset: size * (page - 1),
+      limit: size
     });
-    return;
+  } catch (e) {
+    next(e);
   }
-  formatRes(res, {
-    data: {
-      list: data.items.filter((_, index) => {
-        return index >= (page - 1) * size && index < page * size
-      }),
-      total: data.items.length
-    }
-  })
+  res.send({
+    message: '获取项目api分页成功',
+    data
+  });
 }
 
 // 预览项目api
-exports.preview = async (req, res) => {
+exports.preview = async (req, res, next) => {
   const {api_id, project_id} = req.query;
   const type = req.method;
+  let match = project.selectOne({
+    id: project_id
+  });
+  let meta;
+  try {
+    meta = await match.getMeta();
+  } catch (e) {
+    next(e);
+  }
   let data;
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`), 'utf8');
+    data = await match.selectOne({
+      api_id
+    });
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
+    next(e);
   }
-  const match = data.items.filter(item => item.id === api_id)[0];
-  if (match.type !== type.toLowerCase()) {
-    formatRes(res, {
-      error: 'client',
-      message: '请求方式有误'
-    });
-    return;
+  if (data.type !== type.toLowerCase()) {
+    next(new ClientError('请求方式有误'));
   }
-  const url = match.url;
-  let originData;
-  try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}${url}.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  }
-  const ret = Mock.mock(originData);
-  formatRes(res, {
-    data: ret
+  res.send({
+    data: Mock.mock(data.code)
   });
 }
 
 // 创建项目api
-exports.create = async (req, res) => {
+exports.create = async (req, res, next) => {
   const {project_id, url, type, title, code} = req.body;
-  let data;
-  try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  }
-  const {items} = data;
-  items.unshift({
-    url,
-    type,
-    title,
-    id: uuid()
+  let match = project.selectOne({
+    id: project_id
   });
-  data.items = items;
   try {
-    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    await match.create({
+      url,
+      type,
+      title,
+      code
     });
-    return;
-  }
-  try {
-    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
   } catch (e) {
-    const dir = url.split('/').slice(0, -1).join('/');
-    await fs.mkdir(resolve(`./run/project/${project_id}/${dir}`), {recursive: true});
-    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
+    next(e);
   }
-  formatRes(res, {
+  res.send({
+    data: null,
     message: '添加成功'
   });
 }
 
 // 更新项目api
-exports.update = async (req, res) => {
+exports.update = async (req, res, next) => {
   const {project_id, api_id, url, type, title, code} = req.body;
-  let data;
+  let match = project.selectOne({
+    id: project_id
+  });
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    await match.update({
+      api_id,
+      url,
+      type,
+      title,
+      code
     });
-    return;
-  }
-  let match = data.items.filter(item => item.id === api_id)[0];
-  if (match.url !== url) {
-    try {
-      await fs.unlink(resolve(`./run/project/${project_id}${match.url}.json`));
-    } catch (e) {
-      formatRes(res, {
-        error: 'server',
-        message: e
-      });
-      return;
-    }
-  }
-  match = {
-    ...match,
-    url,
-    type,
-    title
-  };
-  try {
-    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    next(e);
   }
-  try {
-    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
-  } catch (e) {
-    const dir = url.split('/').slice(0, -1).join('/');
-    await fs.mkdir(resolve(`./run/project/${project_id}/${dir}`), {recursive: true});
-    await fs.writeFile(resolve(`./run/project/${project_id}${url}.json`), code);
-  }
-  formatRes(res, {
+  res.send({
+    data: null,
     message: '修改成功'
   });
 }
 
 // 获取项目api详情
-exports.detail = async (req, res) => {
+exports.detail = async (req, res, next) => {
   const {project_id, api_id} = req.query;
+  let match = project.selectOne({
+    id: project_id
+  });
   let data;
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    data = await match.selectOne({
+      api_id
     });
-    return;
-  }
-  const match = data.items.filter(item => item.id === api_id)[0];
-  let str;
-  try {
-    str = await fs.readFile(resolve(`./run/project/${project_id}${match.url}.json`), 'utf8');
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    next(e);
   }
-  formatRes(res, {
-    data: {
-      ...match,
-      code: str
-    }
+  res.send({
+    message: '获取项目api详情成功',
+    data
   });
 }
 
 // 删除项目api
-exports.delete = async (req, res) => {
+exports.delete = async (req, res, next) => {
   const {project_id, api_id} = req.body;
-  let data;
+  let match = project.selectOne({
+    id: project_id
+  });
   try {
-    data = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    await match.delete({
+      api_id
     });
-    return;
-  }
-  const {items} = data;
-  const match = remove(items, item => item.id === api_id);
-  const {url} = match[0];
-  data.items = items;
-  try {
-    await fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
-    await fs.unlink(resolve(`./run/project/${project_id}${url}.json`));
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    next(e);
   }
-  formatRes(res, {
+  res.send({
+    data: null,
     message: '删除成功'
   });
 }
 
 // 下载项目api压缩包
-exports.download = async (req, res) => {
+exports.download = async (req, res, next) => {
   const {project_id} = req.query;
-  let data;
+  let match = project.selectOne({
+    id: project_id
+  });
+  let downloadUrl = '';
   try {
-    data = await fs.readJson(resolve(`./run/project/${project_id}/meta.json`));
+    downloadUrl = await match.export();
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    next(e);
   }
-  const {title} = data;
-  const uid = uuid();
-  let output = fs.createWriteStream(resolve(`./.temp/${uid}.zip`));
-  let archive = archiver('zip', {
-    zlib: {level: 9}
-  });
-  output.on('close', () => {
-    res.download(resolve(`./.temp/${uid}.zip`));
-  });
-  archive.on('error', err => {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
-  });
-  archive.pipe(output);
-  archive.directory(`${process.cwd()}/run/project/${project_id}/`, `${project_id}`);
-  archive.finalize();
+  res.download(downloadUrl);
 }
 
 // 复制项目api
-exports.clone = async (req, res) => {
+exports.clone = async (req, res, next) => {
   const {project_id, api_id} = req.body;
+  let match = project.selectOne({
+    id: project_id
+  });
   let data;
   try {
-    data = await fs.readJson(`./run/project/${project_id}/meta.json`);
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    data = await match.selectOne({
+      api_id
     });
-    return;
+  } catch (e) {
+    next(e);
   }
-  const match = data.items.filter(item => item.id === api_id)[0];
-  const newApi = {...match};
-  newApi.id = uuid();
-  newApi.title += `${new Date().getSeconds()}`;
-  newApi.url += `_${new Date().getTime()}`;
-  data.items.unshift(newApi);
+  const newApi = {
+    type: data.type
+  };
+  newApi.title = `${data.title}${new Date().getSeconds()}`;
+  newApi.url = `${data.url}_${new Date().getTime()}`;
   try {
-    fs.copyFile(resolve(`./run/project/${project_id}${match.url}.json`), resolve(`./run/project/${project_id}${newApi.url}.json`));
-    fs.writeFile(resolve(`./run/project/${project_id}/meta.json`), jsonFormat(data));
+    await match.copyFile(data.url, newApi.url);
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    next(e);
   }
-  formatRes(res, {
+  try {
+    await match.create({
+      title: newApi.title,
+      url: newApi.url,
+      type: data.type
+    });
+  } catch (e) {
+    next(e);
+  }
+  res.send({
+    data: null,
     message: '接口复制成功'
   });
 }

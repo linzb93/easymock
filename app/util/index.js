@@ -15,10 +15,10 @@ exports.resolve = function(dir) {
 }
 
 exports.errorLogger = err => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(pe.render(err));
-  } else {
+  if (process.env.NODE_ENV === 'production') {
     logger.error(err);
+  } else {
+    console.log(pe.render(err));
   }
 }
 

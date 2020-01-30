@@ -1,32 +1,29 @@
 const fs = require('fs-extra');
 const Mock = require('mockjs');
-const {formatRes, resolve} = require('../util');
+const {niceTry, resolve} = require('../util');
+const {project} = require('../util/db');
 
 module.exports = async (req, res) => {
   const {project_id} = req.params;
   let filePath = req.path.split('/').slice(3).join('/');
+  let match = await project.selectOne({
+    id: project_id
+  });
   let metaData;
   try {
-    metaData = await fs.readJSON(resolve(`./run/project/${project_id}/meta.json`));
+    metaData = match.getMeta();
   } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
-    });
-    return;
+    throw e;
   }
   const {prefix = ''} = metaData;
   let retData;
   filePath = filePath.replace(prefix.slice(1), '');
   try {
-    retData = await fs.readJSON(resolve(`./run/project/${project_id}/${filePath}.json`));
-  } catch (e) {
-    formatRes(res, {
-      error: 'server',
-      message: e
+    retData = await match.selectOne({
+      url: filePath
     });
-    return;
+  } catch (e) {
+    throw e;
   }
-  const ret = Mock.mock(retData);
-  res.send(ret);
+  res.send(Mock.mock(retData));
 }

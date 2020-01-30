@@ -9,7 +9,7 @@ module.exports = (err, req, res, next) => {
       data: null,
       message: err.message
     });
-  } else if (err instanceof ServerError) {
+  } else {
     res.status(500).send({
       data: null,
       message: '服务器故障，请稍后再试！'

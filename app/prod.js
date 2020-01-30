@@ -2,7 +2,7 @@ const shell = require('shelljs');
 const fs = require('fs-extra');
 const moment = require('moment');
 const {resolve} = require('./util');
-const {setLocal, getLocal} = require('./util/local');
+const {set, get} = require('./util/db');
 const hook = require('./hook');
 
 (async () => {
@@ -10,14 +10,14 @@ const hook = require('./hook');
   await hook();
   try {
     await fs.access(resolve(`./build`));
-    if (!getLocal('prod_time') || moment(getLocal('dev_time')).isAfter(getLocal('prod_time'))) {
-      setLocal('prod_time', Date.now());
+    if (!get('prod_time') || moment(get('dev_time')).isAfter(get('prod_time'))) {
+      set('prod_time', Date.now());
       shell.exec('react-scripts build && node app');
     } else {
       shell.exec('node app');
     }
   } catch (e) {
-    setLocal('prod_time', Date.now());
+    set('prod_time', Date.now());
     shell.exec('react-scripts build && node app');
   }
 })();
