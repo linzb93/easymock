@@ -1,29 +1,33 @@
-# easymock
-接口mock工具
+# hackernews-async-ts
 
-## 要求
-Node.js Version > v10.12.0
+[Hacker News](https://news.ycombinator.com/) showcase using typescript && egg
 
-## 安装与使用
-```
-git clone https://github.com/linzb93/easymock.git
+## QuickStart
 
-npm install
+### Development
 
-npm run prod
+```bash
+$ npm i
+$ npm run dev
+$ open http://localhost:7001/
 ```
-打开 http://localhost:4000
 
-如果要进行前端开发，运行
+Don't tsc compile at development mode, if you had run `tsc` then you need to `npm run clean` before `npm run dev`.
+
+### Deploy
+
+```bash
+$ npm run tsc
+$ npm start
 ```
-npm start
-```
-然后打开新命令行窗口，运行
-```
-node app
-```
-如果要进行后端开发，运行
-```
-npm run start:server
-```
-打开 http://localhost:4000
+
+### Npm Scripts
+
+- Use `npm run lint` to check code style
+- Use `npm test` to run unit test
+- se `npm run clean` to clean compiled js at development mode once
+
+### Requirement
+
+- Node.js 8.x
+- Typescript 2.8+

@@ -1,60 +1,84 @@
 {
-  "name": "easymock",
-  "version": "0.1.0",
+  "name": "easymock-v2",
+  "version": "1.0.0",
+  "description": "",
   "private": true,
-  "dependencies": {
-    "ace-builds": "^1.4.7",
-    "antd": "^3.26.3",
-    "archiver": "^3.1.1",
-    "axios": "^0.19.0",
-    "body-parser": "^1.19.0",
-    "clipboardy": "^2.1.0",
-    "cors": "^2.8.5",
-    "cross-env": "^6.0.3",
-    "error-ex": "^1.3.2",
-    "highlight.js": "^9.17.1",
-    "log4js": "^6.1.0",
-    "mockjs": "^1.1.0",
-    "multer": "^1.4.2",
-    "nodemon": "^2.0.2",
-    "p-waterfall": "^2.1.0",
-    "prettier": "^1.19.1",
-    "pretty-error": "^2.1.1",
-    "react": "^16.12.0",
-    "react-ace": "^8.0.0",
-    "react-dom": "^16.12.0",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "3.3.0",
-    "shelljs": "^0.8.3",
-    "unzip": "^0.1.11"
+  "egg": {
+    "typescript": true,
+    "declarations": true
   },
   "scripts": {
-    "start": "node app/start.js",
-    "start:server": "cross-env NODE_ENV=development node app/start",
-    "server": "nodemon app",
-    "manmade": "node app/script",
-    "prod": "cross-env NODE_ENV=production node app/prod"
+    "start": "egg-scripts start --daemon --title=egg-server-easymock-v2",
+    "stop": "egg-scripts stop --title=egg-server-easymock-v2",
+    "dev": "egg-bin dev",
+    "debug": "egg-bin debug",
+    "test-local": "egg-bin test",
+    "test": "npm run lint -- --fix && npm run test-local",
+    "cov": "egg-bin cov",
+    "tsc": "ets && tsc -p tsconfig.json",
+    "ci": "npm run lint && npm run cov && npm run tsc",
+    "autod": "autod",
+    "lint": "eslint . --ext .ts",
+    "clean": "ets clean"
   },
-  "nodemonConfig": {
-    "ignore": [
-      "logs/*",
-      ".temp/*",
-      "run/**/*",
-      "src/*",
-      "build/*",
-      "package.json"
-    ]
+  "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "@types/bytes": "^3.1.0",
+    "@types/fs-extra": "^9.0.1",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/lodash": "^4.14.158",
+    "@types/mockjs": "^1.0.2",
+    "@types/path-to-regexp": "^1.7.0",
+    "@types/prettier": "^2.0.1",
+    "@types/through2": "^2.0.34",
+    "@types/uuid": "^8.0.0",
+    "async-validator": "^3.2.3",
+    "binary": "^0.3.0",
+    "egg": "^2.6.1",
+    "egg-cors": "^2.2.3",
+    "egg-mysql": "^3.0.0",
+    "egg-scripts": "^2.6.0",
+    "egg-validate": "^2.0.2",
+    "fs-extra": "^8.1.0",
+    "fstream": "^1.0.12",
+    "immer": "^6.0.1",
+    "kindof": "^2.0.0",
+    "match-stream": "^0.0.2",
+    "mockjs": "^1.1.0",
+    "p-reduce": "^2.1.0",
+    "p-waterfall": "^2.1.0",
+    "prettier": "^1.19.1",
+    "pullstream": "^1.0.0",
+    "setimmediate": "^1.0.5"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "devDependencies": {
+    "@types/mocha": "^2.2.40",
+    "@types/node": "^7.0.12",
+    "@types/supertest": "^2.0.0",
+    "@types/through2": "^2.0.34",
+    "autod": "^3.0.1",
+    "autod-egg": "^1.1.0",
+    "egg-bin": "^4.11.0",
+    "egg-ci": "^1.8.0",
+    "egg-mock": "^3.16.0",
+    "eslint": "^6.7.2",
+    "eslint-config-egg": "^8.0.0",
+    "tslib": "^1.9.0",
+    "typescript": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "ci": {
+    "version": "8"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "eslintIgnore": [
+    "coverage"
+  ],
+  "author": "",
+  "license": "MIT"
 }
