@@ -23,12 +23,13 @@ DROP TABLE IF EXISTS `api`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `api` (
-  `id` varchar(30) NOT NULL,
-  `name` varchar(30) NOT NULL,
-  `project_id` varchar(30) NOT NULL,
-  `method` varchar(5) NOT NULL,
+  `id` varchar(100) NOT NULL,
+  `name` varchar(30) CHARACTER SET utf8 NOT NULL,
+  `project_id` varchar(100) DEFAULT NULL,
+  `type` varchar(100) DEFAULT NULL,
   `url` varchar(50) NOT NULL,
-  `response` varchar(60000) NOT NULL
+  `code` varchar(60000) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -40,13 +41,14 @@ DROP TABLE IF EXISTS `project`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `project` (
-  `id` varchar(30) NOT NULL,
-  `name` varchar(30) NOT NULL,
+  `id` varchar(100) NOT NULL,
+  `name` varchar(30) CHARACTER SET utf8mb4 NOT NULL,
   `prefix` varchar(20) NOT NULL,
-  `description` varchar(200) NOT NULL,
-  `creator` varchar(30) NOT NULL,
-  `collaborator` varchar(30) NOT NULL,
-  `count` int(11) NOT NULL
+  `description` varchar(1000) DEFAULT NULL,
+  `creator` varchar(100) DEFAULT NULL,
+  `collaborators` varchar(60000) DEFAULT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -58,10 +60,11 @@ DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
-  `id` varchar(30) NOT NULL,
+  `id` varchar(100) NOT NULL,
   `name` varchar(30) NOT NULL,
-  `password` varchar(70) NOT NULL,
-  `salt` varchar(60) NOT NULL
+  `password` varchar(100) DEFAULT NULL,
+  `salt` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -74,4 +77,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-26 13:19:49
+-- Dump completed on 2020-08-05 10:05:25

@@ -3,8 +3,8 @@ module.exports = () => {
     const {request: {url, header: {token}}, service: {user}} = ctx;
     // 登录注册功能不需要验证token
     if (
-      url.startsWith('/project/') &&
-      url.startsWith('/api/')) {
+      url.startsWith('/api/project/') ||
+      url.startsWith('/api/api/')) {
       if (!token) {
         ctx.status = 500;
         ctx.body = {
@@ -15,9 +15,7 @@ module.exports = () => {
       const checkData = await user.check(token);
       if (checkData.code !== 'SUCCESS') {
         ctx.status = 500;
-        ctx.body = {
-          message: checkData.message
-        }
+        ctx.body = checkData;
         return;
       }
       await next();

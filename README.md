@@ -1,33 +1,22 @@
-# hackernews-async-ts
+# easymock
+easymock是一个mock接口的平台，前端用React开发，后端用Egg.js开发，数据库用的是MySQL。
 
-[Hacker News](https://news.ycombinator.com/) showcase using typescript && egg
-
-## QuickStart
-
-### Development
+## 安装启动
+下载Node.js版本号在V8.9.0以上，MySQL版本号在V5.7.27以上。下面是下载代码和导入数据库的代码。
 
 ```bash
-$ npm i
-$ npm run dev
-$ open http://localhost:7001/
+git clone https://github.com/linzb93/easymock.git
+npm install
+npm start
+
+mysql -u root -p easymock < easymock.sql
 ```
 
-Don't tsc compile at development mode, if you had run `tsc` then you need to `npm run clean` before `npm run dev`.
-
-### Deploy
-
+开发模式请运行
 ```bash
-$ npm run tsc
-$ npm start
+npm run dev
 ```
 
-### Npm Scripts
+前端代码见 [easymock-fe](https://github.com/linzb93/easymock-fe)。
 
-- Use `npm run lint` to check code style
-- Use `npm test` to run unit test
-- se `npm run clean` to clean compiled js at development mode once
-
-### Requirement
-
-- Node.js 8.x
-- Typescript 2.8+
+前端代码打包后放入 `app/public` 目录下即可。
