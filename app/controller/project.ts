@@ -86,13 +86,13 @@ export default class extends Controller {
         username
       });
       resp = {
-        data: {
-          success: true
-        },
+        code: 'SUCCESS',
+        data: null,
         message: '上传成功'
       };
     } catch (e) {
       resp = {
+        code: 'UPLOAD_ERROR',
         data: {
           errors: e
         },

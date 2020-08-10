@@ -6,7 +6,7 @@ import {MysqlType, AnyObject} from '../../typings/app/service/util';
 
 export default class Project extends Service {
   // 获取api列表
-  public async select({project_id, page, size}: AnyObject) {
+  public async select({project_id, offset, limit}: AnyObject) {
     const {app} = this;
     const {mysql}: {mysql: MysqlType} = app as any;
     const [list, total] = await Promise.all([
@@ -14,8 +14,8 @@ export default class Project extends Service {
         where: {
           project_id
         },
-        limit: size,
-        offset: page * size
+        limit,
+        offset
       }),
       mysql.query(`SELECT COUNT(*) FROM \`api\` WHERE \`project_id\` = '${project_id}'`)
     ])
@@ -119,26 +119,27 @@ export default class Project extends Service {
   }
 
   // 复制api
-  public async clone({api_id, project_id, username}: AnyObject) {
+  public async clone({id, project_id, username}: AnyObject) {
     const {app} = this;
     const {mysql}: {mysql: MysqlType} = app as any;
     const projRet = await mysql.get('project', {
-      project_id,
+      id: project_id,
       creator: username
     });
     if (projRet === null) {
       throw new Error('无权限复制');
     }
-    const originApi = await mysql.get('api', {id: api_id});
+    const originApi = await mysql.get('api', {id});
     const newApi = {
       type: originApi.type,
-      title: `${originApi.title}${new Date().getSeconds()}`,
+      name: `${originApi.name}${new Date().getSeconds()}`,
       url: `${originApi.url}_${new Date().getTime()}`
     }
     await this.create({
       project_id,
       ...newApi,
-      code: originApi.code
+      code: originApi.code,
+      username
     });
   }
 }

@@ -119,13 +119,15 @@ export default class ApiController extends Controller {
 
   // 复制项目api
   public async clone() {
-    const {ctx, ctx: {request: {body}}, service: {api}} = this;
+    const {ctx, ctx: {request: {body, header}}, service: {api}} = this;
     ctx.validate({
       id: {type: 'string'}
     });
+    const {name: username} = jwt.decode(header.token) as AnyObject;
     const {project_id, id} = body;
     await api.clone({
       project_id,
+      username,
       id
     });
     ctx.body = {

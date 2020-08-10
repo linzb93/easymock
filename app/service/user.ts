@@ -47,7 +47,7 @@ export default class User extends Service {
         expiresIn: A_WEEK
       });
       return {
-        token,
+        data: {token},
         ...loginRet.SUCCESS
       }
     } else {

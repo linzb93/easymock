@@ -28,7 +28,7 @@ export default class UserController extends Controller {
     const {ctx, ctx: {request: {query, header}}, service} = this;
     ctx.validate({
       name: {type: 'string'}
-    });
+    }, query);
     const {name: username} = jwt.decode(header.token) as AnyObject;
     const ret = await service.user.checkExists({
       name: query.name,
